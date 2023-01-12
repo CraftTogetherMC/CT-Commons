@@ -28,10 +28,12 @@ public final class CTCommons extends JavaPlugin {
         localizationManager = new LocalizationManager(this, "de_DE", "en_EN", "locales");
 
         // Check for updates
-        if (!getConfig().getBoolean("Settings.Updates.Notify.DisableNotifications")
-                && getConfig().getBoolean("Settings.Updates.Notify.Console"))
+        if (!getConfig().getBoolean("Updates.Notify.DisableNotifications"))
         {
-            UpdateChecker.checkUpdatesAsync((String version, String build, String fileName, Integer fileSize, String url, String currentVersion, String currentBuild, BuildType buildType) -> {
+            new UpdateChecker(this).checkUpdatesAsync((String version, String build, String fileName, Integer fileSize, String url, String currentVersion, String currentBuild, BuildType buildType) -> {
+                if (buildType.equals(BuildType.UP2DATE))
+                    return;
+
                 switch (buildType) {
                     case RELEASE -> plugin.getLogger().warning("A new full version of this plugin was released!");
                     case SNAPSHOT -> plugin.getLogger().warning("A new snapshot version of this plugin is available!");
@@ -42,7 +44,7 @@ public final class CTCommons extends JavaPlugin {
                 plugin.getLogger().warning("FileName: " + fileName + " FileSize: " + UpdateChecker.humanReadableFileSize(fileSize));
                 plugin.getLogger().warning("You are on version: " + currentVersion + " #" + currentBuild);
 
-            }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
+            }, plugin.getConfig().getBoolean("Updates.CheckForDevBuilds"));
         }
 
         getLogger().info(getName() + " v" + getDescription().getVersion() + " enabled.");

@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.crafttogether.ctcommons.CTCommons;
 import de.crafttogether.ctcommons.util.PluginUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -16,21 +16,25 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 
 public class UpdateChecker {
-    private final static CTCommons plugin = CTCommons.plugin;
+    private final Plugin plugin;
 
     public interface Consumer {
         void operation(String version, String build, String fileName, Integer fileSize, String url, String currentVersion, String currentBuild, BuildType buildType);
     }
 
-    public static void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds) {
+    public UpdateChecker(Plugin plugin) {
+        this.plugin = plugin;
+    }
+    
+    public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkUpdates(consumer, checkForDevBuilds));
     }
 
-    public static void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds, long delay) {
+    public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds, long delay) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> checkUpdates(consumer, checkForDevBuilds), delay);
     }
 
-    public static void checkUpdates(Consumer consumer, boolean checkForDevBuilds) {
+    public void checkUpdates(Consumer consumer, boolean checkForDevBuilds) {
         Gson gson = new Gson();
         String json;
 
@@ -104,7 +108,7 @@ public class UpdateChecker {
         }
     }
 
-    private static String readUrl(String urlString) throws Exception {
+    private String readUrl(String urlString) throws Exception {
         BufferedReader reader = null;
         try {
             URL url = new URL(urlString);
@@ -122,6 +126,16 @@ public class UpdateChecker {
         }
     }
 
+    private int intOrZero(JsonObject jsonObject, String key) {
+        JsonElement jsonElement = jsonObject.get(key);
+        return jsonElement instanceof JsonNull ? 0 : jsonElement.getAsInt();
+    }
+
+    private String stringOrNull(JsonObject jsonObject, String key) {
+        JsonElement jsonElement = jsonObject.get(key);
+        return jsonElement instanceof JsonNull ? null : jsonElement.getAsString();
+    }
+
     public static String humanReadableFileSize(long bytes) {
         if (-1000 < bytes && bytes < 1000) {
             return bytes + " B";
@@ -132,15 +146,5 @@ public class UpdateChecker {
             ci.next();
         }
         return String.format("%.1f %cB", bytes / 1000.0, ci.current());
-    }
-
-    private static int intOrZero(JsonObject jsonObject, String key) {
-        JsonElement jsonElement = jsonObject.get(key);
-        return jsonElement instanceof JsonNull ? 0 : jsonElement.getAsInt();
-    }
-
-    private static String stringOrNull(JsonObject jsonObject, String key) {
-        JsonElement jsonElement = jsonObject.get(key);
-        return jsonElement instanceof JsonNull ? null : jsonElement.getAsString();
     }
 }
