@@ -1,0 +1,6 @@
+Updates:
+  DisableNotifications: false
+  CheckForDevBuilds: true
+  Notify:
+    Console: true
+    InGame: true
