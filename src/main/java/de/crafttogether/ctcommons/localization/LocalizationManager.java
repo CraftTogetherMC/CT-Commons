@@ -13,17 +13,22 @@ import java.util.List;
 import java.util.Locale;
 
 public class LocalizationManager {
-    private static final CTCommons plugin = CTCommons.plugin;
+    private static LocalizationManager instance;
 
     private final YamlConfiguration localizationConfig;
+    private final Plugin plugin;
 
     private String localeFolder;
     private String localeFile;
     private String localeKey;
 
     private List<String> headers = new ArrayList<>();
+    private List<Placeholder> placeholders = new ArrayList<>();
 
     public LocalizationManager(Plugin plugin, String useLocale, String defaultLocale, String localeFolder) {
+        instance = this;
+        this.plugin = plugin;
+
         this.localeKey = useLocale;
         this.localeFolder = plugin.getDataFolder() + File.separator + localeFolder;
         this.localeFile = this.localeFolder + File.separator + useLocale + ".yml";
@@ -150,5 +155,25 @@ public class LocalizationManager {
             plugin.getLogger().warning("Failed saving locale file: '" + localeFile + "'");
             plugin.getLogger().warning(e.getMessage());
         }
+    }
+
+    public List<Placeholder> getPlaceholders() {
+        return placeholders;
+    }
+
+    public void setPlaceholders(List<Placeholder> placeholders) {
+        this.placeholders = placeholders;
+    }
+
+    public void addPlaceholder(Placeholder placeholder) {
+        this.placeholders.add(placeholder);
+    }
+
+    public void removePlaceholder(Placeholder placeholder) {
+        this.placeholders.remove(placeholder);
+    }
+
+    public static LocalizationManager getInstance() {
+        return instance;
     }
 }

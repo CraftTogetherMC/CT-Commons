@@ -18,6 +18,9 @@ public interface ILocalizationEnum extends ILocalizationDefault {
         if (text == null || text.isEmpty())
             return null;
 
+        // Add global placeholders
+        resolvers.addAll(LocalizationManager.getInstance().getPlaceholders());
+
         for (Placeholder resolver : resolvers)
             text = resolver.resolve(text);
 
