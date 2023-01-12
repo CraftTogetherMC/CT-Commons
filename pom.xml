@@ -138,6 +138,12 @@
                 </executions>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <relocations>
+                        <relocation>
+                            <pattern>net.kyori</pattern>
+                            <shadedPattern>de.crafttogether.common.dep.net.kyori</shadedPattern>
+                        </relocation>
+                    </relocations>
                 </configuration>
             </plugin>
 
