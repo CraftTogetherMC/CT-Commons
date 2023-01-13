@@ -20,9 +20,9 @@ public class MySQLConnection {
         void operation(E exception, V result);
     }
 
-    public  MySQLConnection(HikariDataSource dataSource, Plugin bukkitPlugin) {
+    public MySQLConnection(HikariDataSource dataSource, Plugin plugin) {
         this.dataSource = dataSource;
-        this.plugin = bukkitPlugin;
+        this.plugin = plugin;
     }
 
     private void executeAsync(Runnable task) {
@@ -192,6 +192,6 @@ public class MySQLConnection {
     }
 
     public String getTablePrefix() {
-        return MySQLAdapter.getAdapter().getConfig().getTablePrefix();
+        return MySQLAdapter.prefix;
     }
 }
