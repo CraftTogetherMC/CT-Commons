@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -41,7 +40,6 @@ public class LocalizationManager {
         addHeader("Below are the localization nodes set for plugin '" + plugin.getName() + "'.");
         addHeader("For colors and text-formatting use the MiniMessage format.");
         addHeader("https://docs.adventure.kyori.net/minimessage/format.html");
-        addHeader("");
 
         // Create folder if not exists
         try {
@@ -53,6 +51,7 @@ public class LocalizationManager {
         }
 
         this.localizationConfig = new YamlConfiguration();
+        this.localizationConfig.options().header(this.getHeaderString());
 
         // Create file if not existing
         if (!new File(localeFile).exists()) {
@@ -61,7 +60,6 @@ public class LocalizationManager {
                 this.localeKey = defaultLocale;
                 this.localeFile = this.localeFolder + File.separator + this.localeKey + ".yml";
             }
-            this.setupHeaders();
         }
         // Otherwise load its contents
         else
@@ -74,28 +72,26 @@ public class LocalizationManager {
         this.saveLocalization();
     }
 
-    private void setupHeaders() {
-        StringBuilder headers = new StringBuilder();
-
-        for (var i = 0; i < this.headers.size(); i++) {
-            if (i == headers.length() - 1)
-                headers.append(this.headers.get(i));
-            else
-                headers.append(this.headers.get(i)).append(System.lineSeparator());
-        }
-
-        //noinspection deprecation
-        this.localizationConfig.options().header(headers.toString());
-    }
-
     public void setHeader(String string) {
         headers = new ArrayList<>();
         addHeader(string);
     }
 
     public void addHeader(String string) {
-        if (!string.isEmpty() && !string.startsWith("#")) string = "#> " + string;
+        if (!string.startsWith("#")) string = "#> " + string;
         headers.add(string);
+    }
+
+    public void writeHeaders() {
+        this.localizationConfig.options().header(this.getHeaderString());
+        this.saveLocalization();
+    }
+
+    private String getHeaderString() {
+        StringBuilder headers = new StringBuilder();
+        for (String header : this.headers)
+            headers.append(header).append(System.lineSeparator());
+        return headers.toString();
     }
 
     public void loadLocales(Class<? extends ILocalizationDefault> localizationDefaults) {
