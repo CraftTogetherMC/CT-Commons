@@ -21,6 +21,10 @@ public class NetworkLocation implements Serializable {
         this.z = z;
     }
 
+    /**
+     * Gets the corresponding org.bukkit.Location of this location
+     * @return The corresponding Location
+     */
     public Location getBukkitLocation() {
         if (Bukkit.getWorld(this.world) == null)
             return null;
@@ -28,11 +32,17 @@ public class NetworkLocation implements Serializable {
         return new Location(Bukkit.getWorld(this.world), this.getX(), this.getY(), this.getZ());
     }
 
-    public static NetworkLocation fromBukkitLocation(Location loc, String serverName) {
-        if (loc.getWorld() == null)
+    /**
+     * Gets a new NetworkLocation based on the given org.bukkit.Location
+     * @param location The location
+     * @param serverName Name of the server of the location
+     * @return
+     */
+    public static NetworkLocation fromBukkitLocation(Location location, String serverName) {
+        if (location.getWorld() == null)
             return null;
 
-        return new NetworkLocation(serverName, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
+        return new NetworkLocation(serverName, location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
     }
 
     public String getServer() {
