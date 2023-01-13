@@ -33,14 +33,15 @@ public final class CTCommons extends JavaPlugin implements Listener {
         saveDefaultConfig();
 
         // Initialize LocalizationManager
-        localizationManager = new LocalizationManager(this, Localization.class, "de_DE", "en_EN", "locales");
+        localizationManager = new LocalizationManager(this, Localization.class, getConfig().getString("Settings.Language"), "en_EN", "locales");
         localizationManager.addTagResolver("prefix", Localization.PREFIX.deserialize());
+
         // Register events
         getServer().getPluginManager().registerEvents(this, this);
 
         // Check for updates
-        if (!getConfig().getBoolean("Updates.Notify.DisableNotifications")
-                && getConfig().getBoolean("Updates.Notify.Console"))
+        if (!getConfig().getBoolean("Settings.Updates.Notify.DisableNotifications")
+                && getConfig().getBoolean("Settings.Updates.Notify.Console"))
         {
             new UpdateChecker(this).checkUpdatesAsync((String version, String build, String fileName, Integer fileSize, String url, String currentVersion, String currentBuild, BuildType buildType) -> {
                 if (buildType.equals(BuildType.UP2DATE))
@@ -56,7 +57,7 @@ public final class CTCommons extends JavaPlugin implements Listener {
                 plugin.getLogger().warning("FileName: " + fileName + " FileSize: " + UpdateChecker.humanReadableFileSize(fileSize));
                 plugin.getLogger().warning("You are on version: " + currentVersion + " #" + currentBuild);
 
-            }, plugin.getConfig().getBoolean("Updates.CheckForDevBuilds"));
+            }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
         }
 
         getLogger().info(getName() + " v" + getDescription().getVersion() + " enabled.");

@@ -1,6 +1,8 @@
-Updates:
-  DisableNotifications: false
-  CheckForDevBuilds: true
-  Notify:
-    Console: true
-    InGame: true
+Settings:
+  Language: en_EN
+  Updates:
+    DisableNotifications: false
+    CheckForDevBuilds: true
+    Notify:
+      Console: true
+      InGame: true
