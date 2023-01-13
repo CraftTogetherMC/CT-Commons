@@ -6,7 +6,7 @@ import org.bukkit.Location;
 import java.io.Serializable;
 
 /**
- * Representation of a Location in a BungeeCord network
+ * Representation of a location in a BungeeCord network
  **/
 
 @SuppressWarnings("unused")
