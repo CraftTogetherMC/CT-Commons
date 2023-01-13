@@ -1,5 +1,6 @@
-package de.crafttogether.ctcommons.mysql;
+package de.crafttogether.common.mysql;
 
+@SuppressWarnings("unused")
 public class MySQLConfig {
     String host;
     Integer port;

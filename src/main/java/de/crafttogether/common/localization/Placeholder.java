@@ -1,5 +1,6 @@
-package de.crafttogether.ctcommons.localization;
+package de.crafttogether.common.localization;
 
+@SuppressWarnings("unused")
 public class Placeholder {
     private final String name;
     private final String value;

@@ -1,8 +1,9 @@
-package de.crafttogether.ctcommons.mysql;
+package de.crafttogether.common.mysql;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.plugin.Plugin;
 
+@SuppressWarnings("unused")
 public class MySQLAdapter {
     private static MySQLAdapter adapter;
 

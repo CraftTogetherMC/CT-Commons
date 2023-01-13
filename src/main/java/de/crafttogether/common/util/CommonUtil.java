@@ -1,4 +1,4 @@
-package de.crafttogether.ctcommons.util;
+package de.crafttogether.common.util;
 
 import org.bukkit.Bukkit;
 

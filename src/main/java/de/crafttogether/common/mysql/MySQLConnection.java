@@ -1,4 +1,4 @@
-package de.crafttogether.ctcommons.mysql;
+package de.crafttogether.common.mysql;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 
+@SuppressWarnings("unused")
 public class MySQLConnection {
     private final Plugin plugin;
 

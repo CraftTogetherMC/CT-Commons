@@ -1,6 +1,8 @@
 package de.crafttogether.ctcommons;
 
-import de.crafttogether.ctcommons.localization.LocalizationEnum;
+import de.crafttogether.CTCommons;
+import de.crafttogether.common.localization.LocalizationEnum;
+import de.crafttogether.common.localization.LocalizationManager;
 
 public class Localization extends LocalizationEnum {
     public static final Localization PREFIX = new Localization("prefix", "<gold>CTLib </gold><dark_gray>» </dark_gray>");
@@ -24,7 +26,7 @@ public class Localization extends LocalizationEnum {
     }
 
     @Override
-    public String get() {
-        return CTCommons.plugin.getLocalizationManager().getLocale(this.getName());
+    public LocalizationManager getManager() {
+        return CTCommons.plugin.getLocalizationManager();
     }
 }

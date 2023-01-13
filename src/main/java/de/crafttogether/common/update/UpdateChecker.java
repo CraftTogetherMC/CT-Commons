@@ -1,10 +1,10 @@
-package de.crafttogether.ctcommons.update;
+package de.crafttogether.common.update;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.crafttogether.ctcommons.util.PluginUtil;
+import de.crafttogether.common.util.PluginUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.Plugin;
@@ -53,7 +53,7 @@ public class UpdateChecker {
 
             int installedBuildNumber = 0;
             String installedBuildVersion = plugin.getDescription().getVersion();
-            Configuration pluginDescription = PluginUtil.getPluginFile();
+            Configuration pluginDescription = PluginUtil.getPluginFile(plugin);
             String stringBuildNumber = pluginDescription == null ? null : (String) pluginDescription.get("build");
 
             if (stringBuildNumber != null && !stringBuildNumber.equals("NO-CI"))

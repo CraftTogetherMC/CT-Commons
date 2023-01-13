@@ -1,11 +1,14 @@
-package de.crafttogether.ctcommons.localization;
+package de.crafttogether.common.localization;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 
+@SuppressWarnings("unused")
 public abstract class LocalizationEnum implements ILocalizationEnum {
     private final String name;
     private final String defValue;
+
+    private LocalizationManager manager;
 
     public LocalizationEnum(String name, String defValue) {
         this.name = name;
@@ -33,5 +36,10 @@ public abstract class LocalizationEnum implements ILocalizationEnum {
     }
 
     @Override
-    public abstract String get();
+    public String get() {
+        return ILocalizationEnum.super.get();
+    }
+
+    @Override
+    public abstract LocalizationManager getManager();
 }

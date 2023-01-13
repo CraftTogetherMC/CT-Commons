@@ -1,19 +1,23 @@
-package de.crafttogether.ctcommons.localization;
+package de.crafttogether.common.localization;
 
-import de.crafttogether.ctcommons.CTCommons;
-import de.crafttogether.ctcommons.Localization;
-import de.crafttogether.ctcommons.util.CommonUtil;
+import de.crafttogether.common.util.CommonUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+@SuppressWarnings("unused")
 public class LocalizationManager {
-    private static LocalizationManager instance;
+    private MiniMessage miniMessage;
 
     private final YamlConfiguration localizationConfig;
     private final Plugin plugin;
@@ -24,9 +28,9 @@ public class LocalizationManager {
 
     private List<String> headers = new ArrayList<>();
     private List<Placeholder> placeholders = new ArrayList<>();
+    private List<TagResolver> tagResolvers = new ArrayList<>();
 
-    public LocalizationManager(Plugin plugin, String useLocale, String defaultLocale, String localeFolder) {
-        instance = this;
+    public LocalizationManager(Plugin plugin, Class<? extends ILocalizationDefault> localization, String useLocale, String defaultLocale, String localeFolder) {
         this.plugin = plugin;
 
         this.localeKey = useLocale;
@@ -52,19 +56,19 @@ public class LocalizationManager {
 
         // Create file if not existing
         if (!new File(localeFile).exists()) {
-            plugin.getLogger().warning("Could not find locale file: '" + localeFile + "' switching to default language. (" + defaultLocale + ")");
-
-            this.localeKey = defaultLocale;
-            this.localeFile = this.localeFolder + File.separator + this.localeKey + ".yml";
+            if (!localeKey.equals(defaultLocale)) {
+                plugin.getLogger().warning("Could not find locale file: '" + localeFile + "' switching to default language. (" + defaultLocale + ")");
+                this.localeKey = defaultLocale;
+                this.localeFile = this.localeFolder + File.separator + this.localeKey + ".yml";
+            }
             this.setupHeaders();
         }
-
         // Otherwise load its contents
         else
             this.loadLocalization();
 
         // Apply defaults
-        this.loadLocales(Localization.class);
+        this.loadLocales(localization);
 
         // Save
         this.saveLocalization();
@@ -80,6 +84,7 @@ public class LocalizationManager {
                 headers.append(this.headers.get(i)).append(System.lineSeparator());
         }
 
+        //noinspection deprecation
         this.localizationConfig.options().header(headers.toString());
     }
 
@@ -103,13 +108,11 @@ public class LocalizationManager {
     }
 
     public void loadLocale(String path, String defaultValue) {
-        path = path.toLowerCase(Locale.ENGLISH);
         if (!this.localizationConfig.contains(path))
             this.localizationConfig.set(path, defaultValue);
     }
 
     public String getLocale(String path) {
-        path = path.toLowerCase(Locale.ENGLISH);
         return this.localizationConfig.getString(path, "");
     }
 
@@ -157,6 +160,38 @@ public class LocalizationManager {
         }
     }
 
+    public List<TagResolver> getTagResolvers() {
+        return tagResolvers;
+    }
+
+    public void setTagResolvers(List<TagResolver> tagResolvers) {
+        this.tagResolvers = tagResolvers;
+    }
+
+    public void addTagResolver(TagResolver tagResolver) {
+        this.tagResolvers.add(tagResolver);
+    }
+
+    public void addTagResolver(String key, Component value) {
+        addTagResolver(TagResolver.resolver(key, Tag.selfClosingInserting(value)));
+    }
+
+    public void addTagResolver(String key, String value) {
+        addTagResolver(key, Component.text(value));
+    }
+
+    public void addTagResolver(String key, Integer value) {
+        addTagResolver(key, Component.text(value));
+    }
+
+    public void addTagResolver(String key, double value) {
+        addTagResolver(key, Component.text(value));
+    }
+
+    public void addTagResolver(String key, long value) {
+        addTagResolver(TagResolver.resolver(key, Tag.selfClosingInserting(Component.text(value))));
+    }
+
     public List<Placeholder> getPlaceholders() {
         return placeholders;
     }
@@ -169,11 +204,27 @@ public class LocalizationManager {
         this.placeholders.add(placeholder);
     }
 
+    public void addPlaceholder(String key, String value) {
+        this.placeholders.add(Placeholder.set(key, value));
+    }
+
+    public void addPlaceholder(String key, Integer value) {
+        this.placeholders.add(Placeholder.set(key, value));
+    }
+
+    public void addPlaceholder(String key, double value) {
+        this.placeholders.add(Placeholder.set(key, value));
+    }
+
+    public void addPlaceholder(String key, long value) {
+        this.placeholders.add(Placeholder.set(key, value));
+    }
+
     public void removePlaceholder(Placeholder placeholder) {
         this.placeholders.remove(placeholder);
     }
 
-    public static LocalizationManager getInstance() {
-        return instance;
+    public MiniMessage miniMessage() {
+        return MiniMessage.builder().editTags(t -> t.resolvers(this.tagResolvers)).build();
     }
 }
