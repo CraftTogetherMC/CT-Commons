@@ -1,5 +1,6 @@
 package de.crafttogether.common.update;
 
+@SuppressWarnings("unused")
 public class Author {
     private final String absoluteUrl;
     private final String fullName;

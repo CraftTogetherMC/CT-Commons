@@ -29,7 +29,7 @@ public class UpdateChecker {
 
     public void checkUpdates(Consumer consumer, boolean checkForDevBuilds) {
         Gson gson = new Gson();
-        String json = null;
+        String json;
 
         String installedBuildVersion = plugin.getDescription().getVersion();
         Configuration pluginDescription = PluginUtil.getPluginFile(plugin);
@@ -69,13 +69,4 @@ public class UpdateChecker {
         }
     }
 
-    private int intOrZero(JsonObject jsonObject, String key) {
-        JsonElement jsonElement = jsonObject.get(key);
-        return jsonElement instanceof JsonNull ? 0 : jsonElement.getAsInt();
-    }
-
-    private String stringOrNull(JsonObject jsonObject, String key) {
-        JsonElement jsonElement = jsonObject.get(key);
-        return jsonElement instanceof JsonNull ? null : jsonElement.getAsString();
-    }
 }

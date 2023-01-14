@@ -2,6 +2,7 @@ package de.crafttogether.common.update;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class Commit {
 
     private final String id;

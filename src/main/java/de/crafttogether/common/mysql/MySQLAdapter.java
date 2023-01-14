@@ -2,11 +2,8 @@ package de.crafttogether.common.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.pool.HikariPool;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
-
-import java.sql.SQLException;
 
 @SuppressWarnings("unused")
 public class MySQLAdapter {

@@ -1,5 +1,6 @@
 package de.crafttogether.common.update;
 
+@SuppressWarnings("unused")
 public class Path {
     private final String editType;
     private final String file;

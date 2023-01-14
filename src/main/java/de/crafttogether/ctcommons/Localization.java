@@ -4,6 +4,7 @@ import de.crafttogether.CTCommons;
 import de.crafttogether.common.localization.LocalizationEnum;
 import de.crafttogether.common.localization.LocalizationManager;
 
+@SuppressWarnings("unused")
 public class Localization extends LocalizationEnum {
     public static final Localization PREFIX = new Localization("prefix", "<gold>CTCommons </gold><dark_gray>» </dark_gray>");
 

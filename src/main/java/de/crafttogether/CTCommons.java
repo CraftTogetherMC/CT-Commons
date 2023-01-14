@@ -2,18 +2,12 @@ package de.crafttogether;
 
 import de.crafttogether.common.localization.Placeholder;
 import de.crafttogether.common.update.Build;
-import de.crafttogether.common.update.Commit;
 import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.Localization;
 import de.crafttogether.common.localization.LocalizationManager;
-import de.crafttogether.common.update.BuildType;
 import de.crafttogether.common.update.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class CTCommons extends JavaPlugin implements Listener, CommandExecutor {
     public static CTCommons plugin;
@@ -41,7 +36,7 @@ public final class CTCommons extends JavaPlugin implements Listener, CommandExec
 
         // Create default config
         saveDefaultConfig();
-        getCommand("ctcommons").setExecutor(this);
+        Objects.requireNonNull(getCommand("ctcommons")).setExecutor(this);
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager(this, Localization.class, getConfig().getString("Settings.Language"), "en_EN", "locales");

@@ -4,6 +4,7 @@ import de.crafttogether.common.util.CommonUtil;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class Build {
     private final BuildType type;
     private final String version;
