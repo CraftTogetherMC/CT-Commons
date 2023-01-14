@@ -4,34 +4,6 @@ import java.util.List;
 
 public class Commit {
 
-    static class Author {
-        private final String absoluteUrl;
-        private final String fullName;
-
-        Author(String absoluteUrl, String fullName) {
-            this.absoluteUrl = absoluteUrl;
-            this.fullName = fullName;
-        }
-
-        public String getAbsoluteUrl() {
-            return absoluteUrl;
-        }
-
-        public String getFullName() {
-            return fullName;
-        }
-    }
-
-    static class Path {
-        private final String editType;
-        private final String file;
-
-        Path(String editType, String file) {
-            this.editType = editType;
-            this.file = file;
-        }
-    }
-
     private final String id;
     private final String date;
     private final int timestamp;
