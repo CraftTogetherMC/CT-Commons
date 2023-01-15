@@ -9,7 +9,6 @@ import de.crafttogether.common.update.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import org.bstats.bukkit.Metrics;
-import org.bstats.charts.CustomChart;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
