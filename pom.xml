@@ -155,7 +155,6 @@
                             <shadedPattern>de.crafttogether.common.dep.org.bstats</shadedPattern>
                         </relocation>
                     </relocations>
-                    <minimizeJar>true</minimizeJar>
                 </configuration>
             </plugin>
 
