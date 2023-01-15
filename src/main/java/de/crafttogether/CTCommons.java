@@ -8,6 +8,9 @@ import de.crafttogether.common.localization.LocalizationManager;
 import de.crafttogether.common.update.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.CustomChart;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -59,18 +62,23 @@ public final class CTCommons extends JavaPlugin implements Listener, CommandExec
                 if (build == null)
                     return;
 
-                switch (build.getType()) {
-                    case RELEASE -> plugin.getLogger().warning("A new full version of this plugin was released!");
-                    case SNAPSHOT -> plugin.getLogger().warning("A new snapshot version of this plugin is available!");
-                }
+                // Go sync again to avoid mixing output with other plugins
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    switch (build.getType()) {
+                        case RELEASE -> plugin.getLogger().warning("A new full version of this plugin was released!");
+                        case SNAPSHOT -> plugin.getLogger().warning("A new snapshot version of this plugin is available!");
+                    }
 
-                plugin.getLogger().warning("You can download it here: " + build.getUrl());
-                plugin.getLogger().warning("Version: " + build.getVersion() + " #" + build.getNumber());
-                plugin.getLogger().warning("FileName: " + build.getFileName() + " FileSize: " + build.getHumanReadableFileSize());
-                plugin.getLogger().warning("You are on version: " + currentVersion + " #" + currentBuild);
-
+                    plugin.getLogger().warning("You can download it here: " + build.getUrl());
+                    plugin.getLogger().warning("Version: " + build.getVersion() + " #" + build.getNumber());
+                    plugin.getLogger().warning("FileName: " + build.getFileName() + " FileSize: " + build.getHumanReadableFileSize());
+                    plugin.getLogger().warning("You are on version: " + currentVersion + " #" + currentBuild);
+                });
             }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
         }
+
+        // bStats
+        new Metrics(this, 17413);
 
         getLogger().info(getName() + " v" + getDescription().getVersion() + " enabled.");
     }

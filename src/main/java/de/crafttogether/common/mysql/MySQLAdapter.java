@@ -7,32 +7,28 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public class MySQLAdapter {
-    private static MySQLAdapter adapter;
-
     private final Plugin plugin;
     private final HikariConfig config;
     private HikariDataSource dataSource;
 
-    static String prefix;
+    String tablePrefix;
 
-    public MySQLAdapter(Plugin plugin, HikariConfig config) {
-        adapter = this;
+    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix) {
         this.plugin = plugin;
         this.config = config;
+        this.tablePrefix = tablePrefix;
         this.createDataSource();
     }
 
     public MySQLAdapter(Plugin plugin, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix) {
-        adapter = this;
-        prefix = tablePrefix;
-
         this.plugin = plugin;
         this.config = new HikariConfig();
+        this.tablePrefix = tablePrefix;
         
         if (database != null)
-            this.config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
+            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
         else
-            this.config.setJdbcUrl("jdbc:mysql://" + host + ":" + port);
+            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port);
 
         this.config.setUsername(username);
         this.config.setPassword(password);
@@ -46,18 +42,18 @@ public class MySQLAdapter {
     }
 
     private void createDataSource() {
-        try { this.dataSource = new HikariDataSource(config); }
+        try { this.dataSource = new HikariDataSource(this.config); }
         catch (Exception ignored) { }
     }
 
-    public static MySQLAdapter getAdapter() {
-        return adapter;
+    public MySQLConnection getConnection() {
+        if (this.dataSource == null)
+            return null;
+        return new MySQLConnection(this, this.dataSource, this.plugin);
     }
 
-    public static MySQLConnection getConnection() {
-        if (adapter.dataSource == null)
-            return null;
-        return new MySQLConnection(adapter.dataSource, adapter.plugin);
+    public boolean isActive() {
+        return this.dataSource != null && !this.dataSource.isClosed() && this.dataSource.isRunning();
     }
 
     public HikariConfig getConfig() {
@@ -65,7 +61,7 @@ public class MySQLAdapter {
     }
 
     public void disconnect() {
-        if (dataSource != null)
-            dataSource.close();
+        if (this.dataSource != null)
+            this.dataSource.close();
     }
 }

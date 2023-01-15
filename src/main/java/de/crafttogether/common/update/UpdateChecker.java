@@ -20,20 +20,20 @@ public class UpdateChecker {
     }
     
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkUpdates(consumer, checkForDevBuilds));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds));
     }
 
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds, long delay) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> checkUpdates(consumer, checkForDevBuilds), delay);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds), delay);
     }
 
-    public void checkUpdates(Consumer consumer, boolean checkForDevBuilds) {
+    public void checkUpdatesSync(Consumer consumer, boolean checkForDevBuilds) {
         Gson gson = new Gson();
         String json;
 
         String installedBuildVersion = plugin.getDescription().getVersion();
         Configuration pluginDescription = PluginUtil.getPluginFile(plugin);
-        String stringBuildNumber = pluginDescription == null ? null : (String) pluginDescription.get("build");
+        String stringBuildNumber = pluginDescription == null ? "unkown" : (String) pluginDescription.get("build");
 
         try {
             json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + plugin.getDescription().getName());
@@ -44,29 +44,24 @@ public class UpdateChecker {
 
         try {
             JsonObject response = gson.fromJson(json, JsonObject.class);
-            if (response.has("builds")) {
+            if (response != null && response.has("builds")) {
                 JsonArray builds = response.getAsJsonArray("builds");
 
                 for (JsonElement element : builds) {
                     Build build = gson.fromJson(element, Build.class);
 
-                    if (checkForDevBuilds && !build.getType().equals(BuildType.RELEASE)) {
+                    if (checkForDevBuilds || build.getType().equals(BuildType.RELEASE)) {
                         consumer.operation(null, build, installedBuildVersion, stringBuildNumber);
-                        break;
-                    }
-
-                    else if (build.getType().equals(BuildType.RELEASE)) {
-                        consumer.operation(null, build, installedBuildVersion, stringBuildNumber);
-                        break;
+                        return;
                     }
                 }
-            }
-            else
                 consumer.operation(null, null, installedBuildVersion, stringBuildNumber);
-
+            }
+            else {
+                consumer.operation(null, null, installedBuildVersion, stringBuildNumber);
+            }
         } catch (Exception e) {
             consumer.operation(e, null, installedBuildVersion, stringBuildNumber);
         }
     }
-
 }

@@ -10,8 +10,9 @@ import java.sql.*;
 @SuppressWarnings("unused")
 public class MySQLConnection {
     private final Plugin plugin;
-
+    private final MySQLAdapter adapter;
     private final HikariDataSource dataSource;
+
     private Connection connection = null;
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
@@ -20,7 +21,8 @@ public class MySQLConnection {
         void operation(E exception, V result);
     }
 
-    public MySQLConnection(HikariDataSource dataSource, Plugin plugin) {
+    MySQLConnection(MySQLAdapter adapter, HikariDataSource dataSource, Plugin plugin) {
+        this.adapter = adapter;
         this.dataSource = dataSource;
         this.plugin = plugin;
     }
@@ -33,7 +35,7 @@ public class MySQLConnection {
         if (args.length > 0) statement = String.format(statement, args);
         String finalStatement = statement;
 
-        connection = dataSource.getConnection();
+        this.connection = dataSource.getConnection();
         if (connection != null && !connection.isClosed()) {
             preparedStatement = connection.prepareStatement(finalStatement);
             resultSet = preparedStatement.executeQuery();
@@ -163,10 +165,19 @@ public class MySQLConnection {
         return this;
     }
 
+    public boolean isConnected() {
+        try {
+            return connection != null && !connection.isClosed() && connection.isValid(1);
+        } catch (SQLException ignored) {
+            return false;
+        }
+    }
+
     public MySQLConnection close() {
         if (resultSet != null) {
             try {
                 resultSet.close();
+                resultSet = null;
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
@@ -175,6 +186,7 @@ public class MySQLConnection {
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
+                preparedStatement = null;
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
@@ -183,6 +195,7 @@ public class MySQLConnection {
         if (connection != null) {
             try {
                 connection.close();
+                connection = null;
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
@@ -191,7 +204,11 @@ public class MySQLConnection {
         return this;
     }
 
+    public MySQLAdapter getAdapter() {
+        return adapter;
+    }
+
     public String getTablePrefix() {
-        return MySQLAdapter.prefix;
+        return adapter.tablePrefix;
     }
 }
