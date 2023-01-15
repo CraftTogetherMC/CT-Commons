@@ -1,4 +1,4 @@
-# CTCommons
+# CT Commons
 This is a library we use to create plugins for the [CraftTogetherMC](https://github.com/CraftTogetherMC) minecraft server
 
 ### Includes:
