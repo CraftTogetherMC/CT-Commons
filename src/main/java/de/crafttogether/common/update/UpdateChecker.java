@@ -8,31 +8,57 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Retrieve update information from api.craft-together.de
+ **/
+
 public class UpdateChecker {
     private final Plugin plugin;
 
+    /**
+     *
+     */
     public interface Consumer {
+        /**
+         * @param error
+         * @param build
+         * @param installedVersion
+         * @param installedBuild
+         */
         void operation(@Nullable Exception error, @Nullable Build build, String installedVersion, String installedBuild);
     }
 
     public UpdateChecker(Plugin plugin) {
         this.plugin = plugin;
     }
-    
+
+    /**
+     * @param consumer
+     * @param checkForDevBuilds
+     */
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds));
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds));
     }
 
+    /**
+     * @param consumer
+     * @param checkForDevBuilds
+     * @param delay
+     */
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds, long delay) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds), delay);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this.plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds), delay);
     }
 
+    /**
+     * @param consumer
+     * @param checkForDevBuilds
+     */
     public void checkUpdatesSync(Consumer consumer, boolean checkForDevBuilds) {
         Gson gson = new Gson();
         String json;
 
-        String installedBuildVersion = plugin.getDescription().getVersion();
-        Configuration pluginDescription = PluginUtil.getPluginFile(plugin);
+        String installedBuildVersion = this.plugin.getDescription().getVersion();
+        Configuration pluginDescription = PluginUtil.getPluginFile(this.plugin);
         String stringBuildNumber = pluginDescription == null ? "unkown" : (String) pluginDescription.get("build");
 
         try {

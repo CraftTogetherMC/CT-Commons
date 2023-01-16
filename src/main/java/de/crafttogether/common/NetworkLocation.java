@@ -54,7 +54,7 @@ public class NetworkLocation implements Serializable {
      * @return name of the server
      */
     public String getServer() {
-        return server;
+        return this.server;
     }
 
     /**
@@ -62,7 +62,7 @@ public class NetworkLocation implements Serializable {
      * @return name of the world
      */
     public String getWorld() {
-        return world;
+        return this.world;
     }
 
     /**
@@ -70,7 +70,7 @@ public class NetworkLocation implements Serializable {
      * @return x-coordinate
      */
     public double getX() {
-        return x;
+        return this.x;
     }
 
     /**
@@ -78,7 +78,7 @@ public class NetworkLocation implements Serializable {
      * @return y-coordinate
      */
     public double getY() {
-        return y;
+        return this.y;
     }
 
     /**
@@ -86,7 +86,7 @@ public class NetworkLocation implements Serializable {
      * @return z-coordinate
      */
     public double getZ() {
-        return z;
+        return this.z;
     }
 
     /**
@@ -128,6 +128,6 @@ public class NetworkLocation implements Serializable {
      * Gets a string representing this NetworkLocation
      */
     public String toString() {
-        return "NetworkLocation{server=" + server + ", world=" + world + ", x=" + x + ", y=" + y + ", z=" + z + "}";
+        return "NetworkLocation{server=" + this.server + ", world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + "}";
     }
 }

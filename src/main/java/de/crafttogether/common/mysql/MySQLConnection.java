@@ -28,20 +28,20 @@ public class MySQLConnection {
     }
 
     private void executeAsync(Runnable task) {
-        Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, task);
+        Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, task);
     }
 
     public ResultSet query(String statement, final Object... args) throws SQLException {
         if (args.length > 0) statement = String.format(statement, args);
         String finalStatement = statement;
 
-        this.connection = dataSource.getConnection();
-        if (connection != null && !connection.isClosed()) {
-            preparedStatement = connection.prepareStatement(finalStatement);
-            resultSet = preparedStatement.executeQuery();
+        this.connection = this.dataSource.getConnection();
+        if (this.connection != null && !this.connection.isClosed()) {
+            this.preparedStatement = this.connection.prepareStatement(finalStatement);
+            this.resultSet = this.preparedStatement.executeQuery();
         }
 
-        return resultSet;
+        return this.resultSet;
     }
 
     public int insert(String statement, final Object... args) throws SQLException {
@@ -50,15 +50,15 @@ public class MySQLConnection {
 
         int lastInsertedId = 0;
 
-        connection = dataSource.getConnection();
-        if (connection != null && !connection.isClosed()) {
-            preparedStatement = connection.prepareStatement(finalStatement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.executeUpdate();
+        this.connection = this.dataSource.getConnection();
+        if (this.connection != null && !this.connection.isClosed()) {
+            this.preparedStatement = this.connection.prepareStatement(finalStatement, Statement.RETURN_GENERATED_KEYS);
+            this.preparedStatement.executeUpdate();
         }
 
-        resultSet = preparedStatement.getGeneratedKeys();
-        if (resultSet.next())
-            lastInsertedId = resultSet.getInt(1);
+        this.resultSet = this.preparedStatement.getGeneratedKeys();
+        if (this.resultSet.next())
+            lastInsertedId = this.resultSet.getInt(1);
 
         return lastInsertedId;
     }
@@ -69,10 +69,10 @@ public class MySQLConnection {
 
         int rows = 0;
 
-        connection = dataSource.getConnection();
-        if (connection != null && !connection.isClosed()) {
-            preparedStatement = connection.prepareStatement(finalStatement);
-            rows = preparedStatement.executeUpdate();
+        this.connection = this.dataSource.getConnection();
+        if (this.connection != null && !this.connection.isClosed()) {
+            this.preparedStatement = this.connection.prepareStatement(finalStatement);
+            rows = this.preparedStatement.executeUpdate();
         }
 
         return rows;
@@ -84,10 +84,10 @@ public class MySQLConnection {
 
         boolean result = false;
 
-        connection = dataSource.getConnection();
-        if (connection != null && !connection.isClosed()) {
-            preparedStatement = connection.prepareStatement(finalStatement);
-            result = preparedStatement.execute();
+        this.connection = this.dataSource.getConnection();
+        if (this.connection != null && !this.connection.isClosed()) {
+            this.preparedStatement = this.connection.prepareStatement(finalStatement);
+            result = this.preparedStatement.execute();
         }
 
         return result;
@@ -167,48 +167,51 @@ public class MySQLConnection {
 
     public boolean isConnected() {
         try {
-            return connection != null && !connection.isClosed() && connection.isValid(1);
-        } catch (SQLException ignored) {
+            return this.connection != null && !this.connection.isClosed() && this.connection.isValid(1);
+        } catch (SQLException e) {
+            this.plugin.getLogger().warning(e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
-    public MySQLConnection close() {
-        if (resultSet != null) {
+    public void close() {
+        if (this.resultSet != null) {
             try {
-                resultSet.close();
-                resultSet = null;
+                this.resultSet.close();
+                this.resultSet = null;
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                this.plugin.getLogger().warning(e.getMessage());
+                e.printStackTrace();
             }
         }
 
-        if (preparedStatement != null) {
+        if (this.preparedStatement != null) {
             try {
-                preparedStatement.close();
-                preparedStatement = null;
+                this.preparedStatement.close();
+                this.preparedStatement = null;
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                this.plugin.getLogger().warning(e.getMessage());
+                e.printStackTrace();
             }
         }
 
-        if (connection != null) {
+        if (this.connection != null) {
             try {
-                connection.close();
-                connection = null;
+                this.connection.close();
+                this.connection = null;
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                this.plugin.getLogger().warning(e.getMessage());
+                e.printStackTrace();
             }
         }
-
-        return this;
     }
 
     public MySQLAdapter getAdapter() {
-        return adapter;
+        return this.adapter;
     }
 
     public String getTablePrefix() {
-        return adapter.tablePrefix;
+        return this.adapter.tablePrefix;
     }
 }

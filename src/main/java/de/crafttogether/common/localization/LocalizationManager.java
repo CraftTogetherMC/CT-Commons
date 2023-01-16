@@ -16,70 +16,117 @@ import java.util.List;
 
 @SuppressWarnings({"unused", "deprecation"})
 public class LocalizationManager {
-    private MiniMessage miniMessage;
-
-    private final YamlConfiguration localizationConfig;
     private final Plugin plugin;
 
+    private final Class<? extends ILocalizationDefault> localization;
+    private final String defaultLocale;
+
+    private YamlConfiguration localizationConfig;
+    private String localeKey;
     private String localeFolder;
     private String localeFile;
-    private String localeKey;
 
     private List<String> headers = new ArrayList<>();
     private List<Placeholder> placeholders = new ArrayList<>();
     private List<TagResolver> tagResolvers = new ArrayList<>();
 
-    public LocalizationManager(Plugin plugin, Class<? extends ILocalizationDefault> localization, String useLocale, String defaultLocale, String localeFolder) {
+    public LocalizationManager(Plugin plugin, Class<? extends ILocalizationDefault> localization, String defaultLocale, String localeFolder) {
         this.plugin = plugin;
-
-        this.localeKey = useLocale;
+        this.localization = localization;
+        this.defaultLocale = defaultLocale;
+        this.localeKey = defaultLocale;
         this.localeFolder = plugin.getDataFolder() + File.separator + localeFolder;
-        this.localeFile = this.localeFolder + File.separator + useLocale + ".yml";
+        this.localeFile = this.localeFolder + File.separator + defaultLocale + ".yml";
 
         // Set up information header
-        addHeader("Below are the localization nodes set for plugin '" + plugin.getName() + "'.");
+        setHeader("Below are the localization nodes set for plugin '" + this.plugin.getName() + "'.");
         addHeader("For colors and text-formatting use the MiniMessage format.");
         addHeader("https://docs.adventure.kyori.net/minimessage/format.html");
+    }
 
-        // Create folder if not exists
+    public void loadLocalization(String localeKey) {
+        this.localizationConfig = new YamlConfiguration();
+        this.localeKey = localeKey;
+        this.localeFile = this.localeFolder + File.separator + localeKey + ".yml";
+
         try {
-            if (new File(localeFolder).createNewFile())
-                plugin.getLogger().info("Created folder: '" + localeFolder + "'");
+            if (new File(this.localeFolder).createNewFile())
+                this.plugin.getLogger().info("Created folder: '" + this.localeFolder + "'");
         } catch (IOException e) {
-            plugin.getLogger().warning("Failed creating folder: '" + localeFolder + "'");
-            plugin.getLogger().warning(e.getMessage());
+            this.plugin.getLogger().warning("Failed creating folder: '" + this.localeFolder + "'");
+            this.plugin.getLogger().warning(e.getMessage());
         }
 
-        this.localizationConfig = new YamlConfiguration();
-        this.localizationConfig.options().header(this.getHeaderString());
+        if (!new File(this.localeFile).exists()) {
+            this.localizationConfig.options().header(this.getHeaderString());
 
-        // Create file if not existing
-        if (!new File(localeFile).exists()) {
-            if (!localeKey.equals(defaultLocale)) {
-                plugin.getLogger().warning("Could not find locale file: '" + localeFile + "' switching to default language. (" + defaultLocale + ")");
-                this.localeKey = defaultLocale;
+            if (!localeKey.equals(this.defaultLocale)) {
+                this.plugin.getLogger().warning("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
+                this.localeKey = this.defaultLocale;
                 this.localeFile = this.localeFolder + File.separator + this.localeKey + ".yml";
+                this.loadLocalization();
             }
         }
-        // Otherwise load its contents
-        else
+        else {
             this.loadLocalization();
+        }
 
-        // Apply defaults
-        this.loadLocales(localization);
-
-        // Save
+        this.loadLocales(this.localization);
         this.saveLocalization();
     }
 
+    private void loadLocalization() {
+        try {
+            this.localizationConfig.load(this.localeFile);
+        } catch (IOException e) {
+            this.plugin.getLogger().warning("Failed reading locale file: '" + this.localeFile + "'");
+            this.plugin.getLogger().warning(e.getMessage());
+        } catch (InvalidConfigurationException e) {
+            this.plugin.getLogger().warning("Failed parsing locale file: '" + this.localeFile + "'");
+            this.plugin.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void saveLocalization() {
+        if (this.localizationConfig == null) {
+            this.plugin.getLogger().warning("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
+            return;
+        }
+
+        try {
+            this.localizationConfig.save(this.localeFile);
+        } catch (IOException e) {
+            this.plugin.getLogger().warning("Failed saving locale file: '" + this.localeFile + "'");
+            this.plugin.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void loadLocales(Class<? extends ILocalizationDefault> localizationDefaults) {
+        for (ILocalizationDefault def : CommonUtil.getClassConstants(localizationDefaults))
+            this.loadLocale(def);
+    }
+
+    public void loadLocale(ILocalizationDefault localizationDefault) {
+        localizationDefault.initDefaults(this.localizationConfig);
+    }
+
+    public String getLocale(String path) {
+        return this.localizationConfig.getString(path, "");
+    }
+
+    public void setLocale(String path, String defaultValue) {
+        if (!this.localizationConfig.contains(path))
+            this.localizationConfig.set(path, defaultValue);
+    }
+
     public void setHeader(String string) {
-        headers = new ArrayList<>();
+        this.headers = new ArrayList<>();
         addHeader(string);
     }
 
     public void addHeader(String string) {
         if (!string.startsWith("#")) string = "#> " + string;
-        headers.add(string);
+        this.headers.add(string);
     }
 
     public void writeHeaders() {
@@ -94,32 +141,12 @@ public class LocalizationManager {
         return headers.toString();
     }
 
-    public void loadLocales(Class<? extends ILocalizationDefault> localizationDefaults) {
-        for (ILocalizationDefault def : CommonUtil.getClassConstants(localizationDefaults))
-            this.loadLocale(def);
-    }
-
-    public void loadLocale(ILocalizationDefault localizationDefault) {
-        localizationDefault.initDefaults(this.localizationConfig);
-    }
-
-    public void loadLocale(String path, String defaultValue) {
-        if (!this.localizationConfig.contains(path))
-            this.localizationConfig.set(path, defaultValue);
-    }
-
-    public String getLocale(String path) {
-        return this.localizationConfig.getString(path, "");
-    }
-
     public String getLocaleKey() {
-        return localeKey;
+        return this.localeKey;
     }
 
     public void setLocaleKey(String localeKey) {
-        this.localeKey = localeKey;
-        this.localeFile = localeFolder + File.separator + localeKey + ".yml";
-        this.loadLocalization();
+        this.localeFile = this.localeFolder + File.separator + this.defaultLocale + ".yml";
     }
 
     public String getLocaleFolder() {
@@ -127,41 +154,8 @@ public class LocalizationManager {
     }
 
     public void setLocaleFolder(String localeFolder) {
-        this.localeFolder = plugin.getDataFolder() + File.separator + localeFolder;
-    }
-
-    public void loadLocalization() {
-        try {
-            this.localizationConfig.load(localeFile);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed reading locale file: '" + localeFile + "'");
-            plugin.getLogger().warning(e.getMessage());
-        } catch (InvalidConfigurationException e) {
-            plugin.getLogger().warning("Failed parsing locale file: '" + localeFile + "'");
-            plugin.getLogger().warning(e.getMessage());
-        }
-    }
-
-    public void saveLocalization() {
-        if (this.localizationConfig == null) {
-            plugin.getLogger().warning("Can't save locale file: '" + localeFile + "' because there is no localization loaded");
-            return;
-        }
-
-        try {
-            this.localizationConfig.save(localeFile);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed saving locale file: '" + localeFile + "'");
-            plugin.getLogger().warning(e.getMessage());
-        }
-    }
-
-    public List<TagResolver> getTagResolvers() {
-        return tagResolvers;
-    }
-
-    public void setTagResolvers(List<TagResolver> tagResolvers) {
-        this.tagResolvers = tagResolvers;
+        this.localeFolder = this.plugin.getDataFolder() + File.separator + localeFolder;
+        this.localeFile = this.localeFolder + File.separator + this.defaultLocale + ".yml";
     }
 
     public void addTagResolver(TagResolver tagResolver) {
@@ -170,6 +164,10 @@ public class LocalizationManager {
 
     public void addTagResolver(String key, Component value) {
         addTagResolver(TagResolver.resolver(key, Tag.selfClosingInserting(value)));
+    }
+
+    public void addTagResolver(String key, Object value) {
+        addTagResolver(key, Component.text(value.toString()));
     }
 
     public void addTagResolver(String key, String value) {
@@ -188,16 +186,20 @@ public class LocalizationManager {
         addTagResolver(TagResolver.resolver(key, Tag.selfClosingInserting(Component.text(value))));
     }
 
-    public List<Placeholder> getPlaceholders() {
-        return placeholders;
+    public List<TagResolver> getTagResolvers() {
+        return tagResolvers;
     }
 
-    public void setPlaceholders(List<Placeholder> placeholders) {
-        this.placeholders = placeholders;
+    public void setTagResolvers(List<TagResolver> tagResolvers) {
+        this.tagResolvers = tagResolvers;
     }
 
     public void addPlaceholder(Placeholder placeholder) {
         this.placeholders.add(placeholder);
+    }
+
+    public void addPlaceholder(String key, Object value) {
+        this.placeholders.add(Placeholder.set(key, value.toString()));
     }
 
     public void addPlaceholder(String key, String value) {
@@ -216,8 +218,16 @@ public class LocalizationManager {
         this.placeholders.add(Placeholder.set(key, value));
     }
 
+    public void setPlaceholders(List<Placeholder> placeholders) {
+        this.placeholders = placeholders;
+    }
+
     public void removePlaceholder(Placeholder placeholder) {
         this.placeholders.remove(placeholder);
+    }
+
+    public List<Placeholder> getPlaceholders() {
+        return placeholders;
     }
 
     public MiniMessage miniMessage() {

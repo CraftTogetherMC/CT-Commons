@@ -1,18 +1,18 @@
 package de.crafttogether;
 
+import de.crafttogether.common.localization.LocalizationManager;
 import de.crafttogether.common.localization.Placeholder;
 import de.crafttogether.common.update.Build;
+import de.crafttogether.common.update.UpdateChecker;
 import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.Localization;
-import de.crafttogether.common.localization.LocalizationManager;
-import de.crafttogether.common.update.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,12 +20,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class CTCommons extends JavaPlugin implements Listener, CommandExecutor {
+public final class CTCommons extends JavaPlugin implements Listener, TabExecutor {
     public static CTCommons plugin;
     public static BukkitAudiences adventure;
 
@@ -38,10 +39,11 @@ public final class CTCommons extends JavaPlugin implements Listener, CommandExec
 
         // Create default config
         saveDefaultConfig();
-        Objects.requireNonNull(getCommand("ctcommons")).setExecutor(this);
+        registerCommand("ctcommons", this);
 
         // Initialize LocalizationManager
-        localizationManager = new LocalizationManager(this, Localization.class, getConfig().getString("Settings.Language"), "en_EN", "locales");
+        localizationManager = new LocalizationManager(this, Localization.class, "en_EN", "locales");
+        localizationManager.loadLocalization(getConfig().getString("Settings.Language"));
         localizationManager.addTagResolver("prefix", Localization.PREFIX.deserialize());
 
         // Register events
@@ -79,7 +81,8 @@ public final class CTCommons extends JavaPlugin implements Listener, CommandExec
         // bStats
         new Metrics(this, 17413);
 
-        getLogger().info(getName() + " v" + getDescription().getVersion() + " enabled.");
+        String build = PluginUtil.getPluginFile(this).getString("build");
+        getLogger().info(getName() + " v" + getDescription().getVersion() + " (" + build + ") enabled.");
     }
 
     @Override
@@ -89,33 +92,61 @@ public final class CTCommons extends JavaPlugin implements Listener, CommandExec
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        new UpdateChecker(plugin).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
-            if (err != null)
-                err.printStackTrace();
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            plugin.getLogger().info("Reloading config.yml...");
+            plugin.reloadConfig();
 
-            List<Placeholder> resolvers = new ArrayList<>();
-            Component message;
+            plugin.getLogger().info("Reloading localization...");
+            plugin.getLocalizationManager().loadLocalization(plugin.getConfig().getString("Settings.Language"));
 
-            if (build == null) {
-                resolvers.add(Placeholder.set("currentVersion", currentVersion));
-                resolvers.add(Placeholder.set("currentBuild", currentBuild));
+            plugin.getLogger().info("Reload completed...");
+            PluginUtil.adventure().sender(sender).sendMessage(Localization.CONFIG_RELOADED.deserialize());
+        }
 
-                message = plugin.getLocalizationManager().miniMessage()
-                        .deserialize("<prefix/><gold>" + plugin.getName() + " version: </gold><yellow>" + currentVersion + " #" + currentBuild + "</yellow><newLine/>");
+        else if (args.length == 0) {
+            new UpdateChecker(plugin).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
+                if (err != null)
+                    err.printStackTrace();
 
-                if (err == null)
-                    message = message.append(Localization.UPDATE_LASTBUILD.deserialize(resolvers));
-                else
-                    message = message.append(Localization.UPDATE_ERROR.deserialize(
-                            Placeholder.set("error", err.getMessage())));
-            }
-            else
-                message = feedback(build, currentVersion, currentBuild);
+                List<Placeholder> resolvers = new ArrayList<>();
+                Component message;
 
-            PluginUtil.adventure().sender(sender).sendMessage(message);
-        }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
+                if (build == null) {
+                    resolvers.add(Placeholder.set("currentVersion", currentVersion));
+                    resolvers.add(Placeholder.set("currentBuild", currentBuild));
+
+                    message = plugin.getLocalizationManager().miniMessage()
+                            .deserialize("<prefix/><gold>" + plugin.getName() + " version: </gold><yellow>" + currentVersion + " #" + currentBuild + "</yellow><newLine/>");
+
+                    if (err == null)
+                        message = message.append(Localization.UPDATE_LASTBUILD.deserialize(resolvers));
+                    else
+                        message = message.append(Localization.UPDATE_ERROR.deserialize(
+                                Placeholder.set("error", err.getMessage())));
+                } else
+                    message = feedback(build, currentVersion, currentBuild);
+
+                PluginUtil.adventure().sender(sender).sendMessage(message);
+            }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
+        }
 
         return true;
+    }
+
+    @Nullable
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        List<String> suggestions = new ArrayList<>();
+
+        if (args.length == 1)
+            suggestions.add("reload");
+
+        return suggestions;
+    }
+
+    public void registerCommand(String cmd, TabExecutor executor) {
+        Objects.requireNonNull(plugin.getCommand(cmd)).setExecutor(executor);
+        Objects.requireNonNull(plugin.getCommand(cmd)).setTabCompleter(executor);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

@@ -48,7 +48,7 @@ public class PluginUtil {
 
     public static Configuration getPluginFile(Plugin plugin) {
         InputStream inputStream = plugin.getResource("plugin.yml");
-        if (inputStream == null) return null;
+        if (inputStream == null) return new YamlConfiguration();
         return YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream));
     }
 

@@ -8,6 +8,8 @@ import de.crafttogether.common.localization.LocalizationManager;
 public class Localization extends LocalizationEnum {
     public static final Localization PREFIX = new Localization("prefix", "<gold>CTCommons </gold><dark_gray>» </dark_gray>");
 
+    public static final Localization CONFIG_RELOADED = new Localization("config.reloaded", "<green>Configuration reloaded.</green>");
+
     public static final Localization UPDATE_LASTBUILD = new Localization("update.lastBuild", "<prefix/><green>Your installed version is up to date</green>");
     public static final Localization UPDATE_RELEASE = new Localization("update.devBuild", """
             <hover:show_text:'<green>Click here to download this version'><click:open_url:'{url}'><prefix/><green>A new full version was released!</green>

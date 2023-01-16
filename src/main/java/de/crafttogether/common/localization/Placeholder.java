@@ -27,10 +27,10 @@ public class Placeholder {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getValue() {
-        return value;
+        return this.value;
     }
 }
