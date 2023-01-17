@@ -49,22 +49,17 @@ public class LocalizationManager {
         this.localeKey = localeKey;
         this.localeFile = this.localeFolder + File.separator + localeKey + ".yml";
 
-        try {
-            if (new File(this.localeFolder).createNewFile())
-                this.plugin.getLogger().info("Created folder: '" + this.localeFolder + "'");
-        } catch (IOException e) {
-            this.plugin.getLogger().warning("Failed creating folder: '" + this.localeFolder + "'");
-            this.plugin.getLogger().warning(e.getMessage());
-        }
+        File folder = new File(this.localeFolder);
+        if ((!folder.exists() || folder.isFile()) && folder.mkdir())
+            this.plugin.getLogger().info("Created folder: '" + this.localeFolder + "'");
 
         if (!new File(this.localeFile).exists()) {
             this.localizationConfig.options().header(this.getHeaderString());
 
             if (!localeKey.equals(this.defaultLocale)) {
                 this.plugin.getLogger().warning("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
-                this.localeKey = this.defaultLocale;
-                this.localeFile = this.localeFolder + File.separator + this.localeKey + ".yml";
-                this.loadLocalization();
+                this.loadLocalization(this.defaultLocale);
+                return;
             }
         }
         else {
