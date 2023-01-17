@@ -1,5 +1,5 @@
 package de.crafttogether.common.update;
 
 public enum BuildType {
-    SNAPSHOT, RELEASE
+    BETA, RELEASE, SNAPSHOT
 }

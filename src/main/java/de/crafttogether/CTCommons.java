@@ -3,6 +3,7 @@ package de.crafttogether;
 import de.crafttogether.common.localization.LocalizationManager;
 import de.crafttogether.common.localization.Placeholder;
 import de.crafttogether.common.update.Build;
+import de.crafttogether.common.update.BuildType;
 import de.crafttogether.common.update.UpdateChecker;
 import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.Localization;
@@ -65,15 +66,15 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
 
                 // Go sync again to avoid mixing output with other plugins
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    switch (build.getType()) {
-                        case RELEASE -> plugin.getLogger().warning("A new full version of this plugin was released!");
-                        case SNAPSHOT -> plugin.getLogger().warning("A new snapshot version of this plugin is available!");
-                    }
+                    if (build.getType().equals(BuildType.RELEASE))
+                        plugin.getLogger().warning("A new full version of this plugin was released!");
+                    else
+                        plugin.getLogger().warning("A new development version of this plugin is available!");
 
                     plugin.getLogger().warning("You can download it here: " + build.getUrl());
-                    plugin.getLogger().warning("Version: " + build.getVersion() + " #" + build.getNumber());
+                    plugin.getLogger().warning("Version: " + build.getVersion() + " (build: " + build.getNumber() + ")");
                     plugin.getLogger().warning("FileName: " + build.getFileName() + " FileSize: " + build.getHumanReadableFileSize());
-                    plugin.getLogger().warning("You are on version: " + currentVersion + " #" + currentBuild);
+                    plugin.getLogger().warning("You are on version: " + currentVersion + " (build: " + currentBuild + ")");
                 });
             }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
         }
@@ -183,10 +184,10 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
         resolvers.add(Placeholder.set("currentVersion", currentVersion));
         resolvers.add(Placeholder.set("currentBuild", currentBuild));
 
-        return switch (build.getType()) {
-            case RELEASE -> Localization.UPDATE_RELEASE.deserialize(resolvers);
-            case SNAPSHOT -> Localization.UPDATE_DEVBUILD.deserialize(resolvers);
-        };
+        if (build.getType().equals(BuildType.RELEASE))
+            return Localization.UPDATE_RELEASE.deserialize(resolvers);
+        else
+            return Localization.UPDATE_DEVBUILD.deserialize(resolvers);
     }
 
     public LocalizationManager getLocalizationManager() {
