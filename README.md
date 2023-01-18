@@ -19,21 +19,24 @@ This is a library we use to create plugins for the [CraftTogetherMC](https://git
 - [TC-Destinations](https://modrinth.com/plugin/tc-destinations)  
 
 ## Maven
-```xml<repositories>
+```xml
+<repositories>
     <repository>
         <id>ctogether</id>
         <url>https://maven.craft-together-mc.de/</url>
     </repository>
-</repositories>```
-
-```xml<dependencies>
+</repositories>
+```   
+```xml
+<dependencies>
     <dependency>
         <groupId>de.crafttogether</groupId>
         <artifactId>CTCommons</artifactId>
         <version>1.0-BETA</version>
         <scope>provided</scope>
     </dependency>
-</dependencies>```
+</dependencies>
+```
 
 ### Includes:
 - [HikariCP](https://github.com/brettwooldridge/HikariCP) (High-performance, JDBC connection pool)
