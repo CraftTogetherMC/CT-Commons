@@ -18,6 +18,23 @@ This is a library we use to create plugins for the [CraftTogetherMC](https://git
 - [TC-Portals](https://modrinth.com/plugin/tc-portals)  
 - [TC-Destinations](https://modrinth.com/plugin/tc-destinations)  
 
+## Maven
+```<repositories>
+    <repository>
+        <id>ctogether</id>
+        <url>https://maven.craft-together-mc.de/</url>
+    </repository>
+</repositories>```
+
+```<dependencies>
+    <dependency>
+        <groupId>de.crafttogether</groupId>
+        <artifactId>CTCommons</artifactId>
+        <version>1.0-BETA</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>```
+
 ### Includes:
 - [HikariCP](https://github.com/brettwooldridge/HikariCP) (High-performance, JDBC connection pool)
 - [MariaDB Connector/J](https://mariadb.com/kb/en/about-mariadb-connector-j/) (JDBC-Driver)
