@@ -24,12 +24,13 @@ public class MySQLAdapter {
         this.plugin = plugin;
         this.config = new HikariConfig();
         this.tablePrefix = tablePrefix;
-        
-        if (database != null)
-            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
-        else
-            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port);
 
+        if (database != null)
+            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database);
+        else
+            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port);
+
+        this.config.setDriverClassName("de.crafttogether.common.dep.org.mariadb.jdbc.Driver");
         this.config.setUsername(username);
         this.config.setPassword(password);
         this.config.setPoolName("[" + plugin.getDescription().getName() + "/MySQL-Pool]");
@@ -43,7 +44,9 @@ public class MySQLAdapter {
 
     private void createDataSource() {
         try { this.dataSource = new HikariDataSource(this.config); }
-        catch (Exception ignored) { }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public MySQLConnection getConnection() {
