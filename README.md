@@ -14,6 +14,10 @@
 # CT-Commons
 This is a library we use to create plugins for the [CraftTogetherMC](https://github.com/CraftTogetherMC) minecraft server
 
+### Plugins using this library:
+- [TC-Portals](https://modrinth.com/plugin/tc-portals)  
+- [TC-Destinations](https://modrinth.com/plugin/tc-destinations)  
+
 ### Includes:
 - [HikariCP](https://github.com/brettwooldridge/HikariCP) (High-performance, JDBC connection pool)
 - [MySQL Connector/J](https://github.com/mysql/mysql-connector-j) (JDBC-Driver)
