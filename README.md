@@ -19,14 +19,14 @@ This is a library we use to create plugins for the [CraftTogetherMC](https://git
 - [TC-Destinations](https://modrinth.com/plugin/tc-destinations)  
 
 ## Maven
-```<repositories>
+```xml<repositories>
     <repository>
         <id>ctogether</id>
         <url>https://maven.craft-together-mc.de/</url>
     </repository>
 </repositories>```
 
-```<dependencies>
+```xml<dependencies>
     <dependency>
         <groupId>de.crafttogether</groupId>
         <artifactId>CTCommons</artifactId>
