@@ -1,6 +1,7 @@
 package de.crafttogether.common.util;
 
 import org.bukkit.Bukkit;
+import org.bukkit.event.Event;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -16,6 +17,15 @@ import java.util.Collection;
 public class CommonUtil {
     public static <T> T[] getClassConstants(Class<T> theClass) {
         return getClassConstants(theClass, theClass);
+    }
+
+    public static void debug(String message) {
+        Bukkit.getLogger().info(message);
+    }
+
+    public static <T extends Event> T callEvent(T event) {
+        Bukkit.getServer().getPluginManager().callEvent(event);
+        return event;
     }
 
     public static String humanReadableFileSize(long bytes) {
