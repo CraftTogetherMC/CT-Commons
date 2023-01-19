@@ -50,6 +50,10 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
         // Register events
         getServer().getPluginManager().registerEvents(this, this);
 
+        // Start messaging service if enabled
+        if (getConfig().getBoolean("Settings.MessagingService"))
+            new MessagingServiceBukkit();
+
         // Check for updates
         if (!getConfig().getBoolean("Settings.Updates.Notify.DisableNotifications")
                 && getConfig().getBoolean("Settings.Updates.Notify.Console"))
