@@ -1,6 +1,6 @@
 name: CTCommons
-version: '${project.version}'
-build: '${project.build.number}'
+version: ${project.version}
+build: ${project.build.number}
 main: de.crafttogether.CTCommons
 api-version: 1.17
 authors: [ J0schlZ ]
