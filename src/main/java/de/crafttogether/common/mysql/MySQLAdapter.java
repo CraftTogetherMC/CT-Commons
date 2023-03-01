@@ -12,23 +12,27 @@ public class MySQLAdapter {
     private HikariDataSource dataSource;
 
     String tablePrefix;
+    String jdbcArguments;
 
-    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix) {
+    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
         this.plugin = plugin;
         this.config = config;
         this.tablePrefix = tablePrefix;
+        this.jdbcArguments = (jdbcArguments == null) ? "" : "&" + jdbcArguments;
         this.createDataSource();
     }
 
-    public MySQLAdapter(Plugin plugin, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix) {
+    public MySQLAdapter(Plugin plugin, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
         this.plugin = plugin;
         this.config = new HikariConfig();
         this.tablePrefix = tablePrefix;
 
+        this.jdbcArguments = (jdbcArguments == null) ? "" : "&" + jdbcArguments;
+
         if (database != null)
-            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database);
+            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database + this.jdbcArguments);
         else
-            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port);
+            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + this.jdbcArguments);
 
         this.config.setDriverClassName("de.crafttogether.common.dep.org.mariadb.jdbc.Driver");
         this.config.setUsername(username);
@@ -40,6 +44,8 @@ public class MySQLAdapter {
         this.config.setMaxLifetime(60000);
         this.config.setAutoCommit(true);
         this.createDataSource();
+
+        plugin.getLogger().info(this.config.getJdbcUrl());
     }
 
     private void createDataSource() {
