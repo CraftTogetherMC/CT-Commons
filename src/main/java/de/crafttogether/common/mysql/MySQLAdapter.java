@@ -44,8 +44,6 @@ public class MySQLAdapter {
         this.config.setMaxLifetime(60000);
         this.config.setAutoCommit(true);
         this.createDataSource();
-
-        plugin.getLogger().info(this.config.getJdbcUrl());
     }
 
     private void createDataSource() {
