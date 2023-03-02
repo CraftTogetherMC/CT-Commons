@@ -27,7 +27,7 @@ public class MySQLAdapter {
         this.config = new HikariConfig();
         this.tablePrefix = tablePrefix;
 
-        this.jdbcArguments = (jdbcArguments == null) ? "" : "&" + jdbcArguments;
+        this.jdbcArguments = (jdbcArguments == null) ? "" : "?" + jdbcArguments;
 
         if (database != null)
             config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database + this.jdbcArguments);
