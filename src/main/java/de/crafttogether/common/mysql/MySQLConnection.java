@@ -169,7 +169,7 @@ public class MySQLConnection {
         try {
             return this.connection != null && !this.connection.isClosed() && this.connection.isValid(1);
         } catch (SQLException e) {
-            this.plugin.getLogger().warning(e.getMessage());
+            this.plugin.getLogger().warning(e.getCause().getMessage());
             e.printStackTrace();
             return false;
         }
@@ -181,7 +181,7 @@ public class MySQLConnection {
                 this.resultSet.close();
                 this.resultSet = null;
             } catch (SQLException e) {
-                this.plugin.getLogger().warning(e.getMessage());
+                this.plugin.getLogger().warning(e.getCause().getMessage());
                 e.printStackTrace();
             }
         }
@@ -191,7 +191,7 @@ public class MySQLConnection {
                 this.preparedStatement.close();
                 this.preparedStatement = null;
             } catch (SQLException e) {
-                this.plugin.getLogger().warning(e.getMessage());
+                this.plugin.getLogger().warning(e.getCause().getMessage());
                 e.printStackTrace();
             }
         }
@@ -201,7 +201,7 @@ public class MySQLConnection {
                 this.connection.close();
                 this.connection = null;
             } catch (SQLException e) {
-                this.plugin.getLogger().warning(e.getMessage());
+                this.plugin.getLogger().warning(e.getCause().getMessage());
                 e.printStackTrace();
             }
         }

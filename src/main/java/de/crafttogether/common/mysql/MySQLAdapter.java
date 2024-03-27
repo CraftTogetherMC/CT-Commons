@@ -2,6 +2,7 @@ package de.crafttogether.common.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.pool.HikariPool;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,13 +16,11 @@ public class MySQLAdapter {
     private HikariDataSource dataSource;
 
     String tablePrefix;
-    String jdbcArguments;
 
-    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
+    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix) {
         this.plugin = plugin;
         this.config = config;
         this.tablePrefix = tablePrefix;
-        this.jdbcArguments = (jdbcArguments == null) ? "" : "&" + jdbcArguments;
         this.createDataSource();
     }
 
@@ -30,12 +29,12 @@ public class MySQLAdapter {
         this.config = new HikariConfig();
         this.tablePrefix = tablePrefix;
 
-        this.jdbcArguments = (jdbcArguments == null) ? "" : "?" + jdbcArguments;
+        jdbcArguments = (jdbcArguments == null) ? "" : "?" + jdbcArguments;
 
         if (database != null)
-            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database + this.jdbcArguments);
+            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database + jdbcArguments);
         else
-            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + this.jdbcArguments);
+            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + jdbcArguments);
 
         this.config.setDriverClassName("de.crafttogether.common.dep.org.mariadb.jdbc.Driver");
         this.config.setUsername(username);
@@ -58,7 +57,8 @@ public class MySQLAdapter {
 
         try { this.dataSource = new HikariDataSource(this.config); }
         catch (Exception e) {
-            this.plugin.getLogger().warning(e.getMessage());
+            this.plugin.getLogger().warning("Can't connect to MySQL-Server!");
+            this.plugin.getLogger().warning(e.getCause().getMessage());
         }
     }
 
