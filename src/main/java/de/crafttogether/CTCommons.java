@@ -2,6 +2,7 @@ package de.crafttogether;
 
 import de.crafttogether.common.localization.LocalizationManager;
 import de.crafttogether.common.localization.Placeholder;
+import de.crafttogether.common.mysql.LogFilter;
 import de.crafttogether.common.update.Build;
 import de.crafttogether.common.update.BuildType;
 import de.crafttogether.common.update.UpdateChecker;
@@ -37,6 +38,9 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
     public void onEnable() {
         plugin = this;
         adventure = BukkitAudiences.create(this);
+
+        // Filter Hikari logs
+        LogFilter.registerFilter();
 
         // Create default config
         saveDefaultConfig();

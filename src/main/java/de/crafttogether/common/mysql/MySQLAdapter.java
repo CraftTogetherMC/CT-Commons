@@ -5,6 +5,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 @SuppressWarnings("unused")
 public class MySQLAdapter {
     private final Plugin plugin;
@@ -47,9 +50,15 @@ public class MySQLAdapter {
     }
 
     private void createDataSource() {
+        Logger.getLogger("com.zaxxer.hikari.pool.PoolBase").setLevel(Level.OFF);
+        Logger.getLogger("com.zaxxer.hikari.pool.HikariPool").setLevel(Level.OFF);
+        Logger.getLogger("com.zaxxer.hikari.HikariDataSource").setLevel(Level.OFF);
+        Logger.getLogger("com.zaxxer.hikari.HikariConfig").setLevel(Level.OFF);
+        Logger.getLogger("com.zaxxer.hikari.util.DriverDataSource").setLevel(Level.OFF);
+
         try { this.dataSource = new HikariDataSource(this.config); }
         catch (Exception e) {
-            e.printStackTrace();
+            this.plugin.getLogger().warning(e.getMessage());
         }
     }
 
