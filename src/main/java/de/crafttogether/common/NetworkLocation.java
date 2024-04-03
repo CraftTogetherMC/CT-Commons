@@ -16,6 +16,9 @@ public class NetworkLocation implements Serializable {
     private double x;
     private double y;
     private double z;
+    private float yaw;
+    private float pitch;
+
 
     public NetworkLocation(String server, String world, double x, double y, double z) {
         this.server = server;
@@ -23,6 +26,17 @@ public class NetworkLocation implements Serializable {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.yaw = 0;
+        this.pitch = 0;
+    }
+    public NetworkLocation(String server, String world, double x, double y, double z, float yaw, float pitch) {
+        this.server = server;
+        this.world = world;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.yaw = yaw;
+        this.pitch = pitch;
     }
 
     /**
@@ -33,7 +47,7 @@ public class NetworkLocation implements Serializable {
         if (Bukkit.getWorld(this.world) == null)
             return null;
 
-        return new Location(Bukkit.getWorld(this.world), this.getX(), this.getY(), this.getZ());
+        return new Location(Bukkit.getWorld(this.world), this.getX(), this.getY(), this.getZ(), this.yaw, this.pitch);
     }
 
     /**
@@ -46,7 +60,7 @@ public class NetworkLocation implements Serializable {
         if (location.getWorld() == null)
             return null;
 
-        return new NetworkLocation(serverName, location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
+        return new NetworkLocation(serverName, location.getWorld().getName(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
 
     /**
@@ -88,6 +102,20 @@ public class NetworkLocation implements Serializable {
     public double getZ() {
         return this.z;
     }
+    /**
+     * Gets the horizontal rotation of this location
+     * @return yaw
+     */
+    public double getYaw() {
+        return this.yaw;
+    }
+    /**
+     * Gets the vertical rotation of this location
+     * @return pitch
+     */
+    public double getPitch() {
+        return this.pitch;
+    }
 
     /**
      * Sets the name of the server of this location
@@ -125,9 +153,23 @@ public class NetworkLocation implements Serializable {
     }
 
     /**
+     * Sets the horizontal rotation of this location
+     */
+    public void setYaw(float pitch) {
+        this.yaw = yaw;
+    }
+
+    /**
+     * Sets the vertical rotation of this location
+     */
+    public void setPitch(float pitch) {
+        this.pitch = pitch;
+    }
+
+    /**
      * Gets a string representing this NetworkLocation
      */
     public String toString() {
-        return "NetworkLocation{server=" + this.server + ", world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + "}";
+        return "NetworkLocation{server=" + this.server + ", world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + ", yaw=" + this.yaw + ", pitch=" + this.pitch + "}";
     }
 }
