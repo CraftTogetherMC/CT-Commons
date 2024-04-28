@@ -158,7 +158,6 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        System.out.println("PLAYERJOIN");
         if (!event.getPlayer().hasPermission("ctcommons.notify.updates"))
             return;
 

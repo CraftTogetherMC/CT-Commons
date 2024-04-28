@@ -87,7 +87,10 @@ public class UpdateChecker {
                 for (JsonElement element : builds) {
                     Build build = gson.fromJson(element, Build.class);
 
-                    if (checkForDevBuilds || build.getType().equals(BuildType.RELEASE)) {
+                    int currentBuild = Integer.parseInt(build.getVersion());
+                    int installedBuild = Integer.parseInt(stringBuildNumber);
+
+                    if (checkForDevBuilds || build.getType().equals(BuildType.RELEASE) && currentBuild > installedBuild) {
                         consumer.operation(null, build, installedBuildVersion, stringBuildNumber);
                         return;
                     }
