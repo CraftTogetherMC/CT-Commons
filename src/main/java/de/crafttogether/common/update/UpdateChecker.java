@@ -28,6 +28,12 @@ public class UpdateChecker {
         void operation(@Nullable Exception error, @Nullable Build build, String installedVersion, String installedBuild);
     }
 
+    public class UpdateFailedExeption extends Exception {
+        public UpdateFailedExeption(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
     public UpdateChecker(Plugin plugin) {
         this.plugin = plugin;
     }
@@ -59,7 +65,7 @@ public class UpdateChecker {
 
         String installedBuildVersion = this.plugin.getDescription().getVersion();
         Configuration pluginDescription = PluginUtil.getPluginFile(this.plugin);
-        String stringBuildNumber = pluginDescription == null ? "unkown" : (String) pluginDescription.get("build");
+        String stringBuildNumber = pluginDescription.get("build") == null ? "unkown" : String.valueOf(pluginDescription.get("build"));
 
         try {
             json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + plugin.getDescription().getName());
@@ -70,7 +76,12 @@ public class UpdateChecker {
 
         try {
             JsonObject response = gson.fromJson(json, JsonObject.class);
-            if (response != null && response.has("builds")) {
+
+            if (response != null && response.has("error")) {
+                Exception err = new UpdateFailedExeption(response.get("error").getAsString());
+                consumer.operation(err, null, installedBuildVersion, stringBuildNumber);
+            }
+            else if (response != null && response.has("builds")) {
                 JsonArray builds = response.getAsJsonArray("builds");
 
                 for (JsonElement element : builds) {
@@ -81,6 +92,7 @@ public class UpdateChecker {
                         return;
                     }
                 }
+
                 consumer.operation(null, null, installedBuildVersion, stringBuildNumber);
             }
             else {

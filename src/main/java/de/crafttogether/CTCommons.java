@@ -60,7 +60,8 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
         {
             new UpdateChecker(this).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
                 if (err != null) {
-                    err.printStackTrace();
+                    plugin.getLogger().warning(" An error occurred while receiving update information.");
+                    plugin.getLogger().warning("Error: " + err.getMessage());
                     return;
                 }
 
@@ -111,7 +112,8 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
         else if (args.length == 0) {
             new UpdateChecker(plugin).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
                 if (err != null)
-                    err.printStackTrace();
+                    plugin.getLogger().warning("An error occurred while receiving update information.");
+                    plugin.getLogger().warning("Error: " + err.getMessage());
 
                 List<Placeholder> resolvers = new ArrayList<>();
                 Component message;
@@ -156,18 +158,23 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        System.out.println("PLAYERJOIN");
         if (!event.getPlayer().hasPermission("ctcommons.notify.updates"))
             return;
 
         Configuration config = plugin.getConfig();
 
-        if (config.getBoolean("Updates.Notify.DisableNotifications")
-                || !config.getBoolean("Updates.Notify.InGame"))
+        plugin.getLogger().info("Settings.Updates.Notify.DisableNotifications: " + config.getBoolean("Updates.Notify.DisableNotifications"));
+        plugin.getLogger().info("Settings.Updates.Notify.InGame: " + config.getBoolean("Updates.Notify.InGame"));
+
+        if (config.getBoolean("Settings.Updates.Notify.DisableNotifications")
+                || !config.getBoolean("Settings.Updates.Notify.InGame"))
             return;
 
         new UpdateChecker(plugin).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
             if (err != null) {
-                err.printStackTrace();
+                plugin.getLogger().warning("An error occurred while receiving update information.");
+                plugin.getLogger().warning("Error: " + err.getMessage());
                 return;
             }
 
@@ -175,7 +182,7 @@ public final class CTCommons extends JavaPlugin implements Listener, TabExecutor
                 return;
 
             PluginUtil.adventure().player(event.getPlayer()).sendMessage(feedback(build, currentVersion, currentBuild));
-        }, plugin.getConfig().getBoolean("Updates.CheckForDevBuilds"), 40L);
+        }, plugin.getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"), 40L);
     }
 
     private Component feedback(Build build, String currentVersion, String currentBuild) {
