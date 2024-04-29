@@ -63,14 +63,14 @@ public class UpdateChecker {
         Gson gson = new Gson();
         String json;
 
-        String installedBuildVersion = this.plugin.getDescription().getVersion();
+        String installedVersion = this.plugin.getDescription().getVersion();
         Configuration pluginDescription = PluginUtil.getPluginFile(this.plugin);
-        String stringBuildNumber = pluginDescription.get("build") == null ? "unkown" : String.valueOf(pluginDescription.get("build"));
+        String installedBuild = pluginDescription.get("build") == null ? "unkown" : String.valueOf(pluginDescription.get("build"));
 
         try {
             json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + plugin.getDescription().getName());
         } catch (Exception e) {
-            consumer.operation(e, null, installedBuildVersion, stringBuildNumber);
+            consumer.operation(e, null, installedVersion, installedBuild);
             return;
         }
 
@@ -79,7 +79,7 @@ public class UpdateChecker {
 
             if (response != null && response.has("error")) {
                 Exception err = new UpdateFailedExeption(response.get("error").getAsString());
-                consumer.operation(err, null, installedBuildVersion, stringBuildNumber);
+                consumer.operation(err, null, installedVersion, installedBuild);
             }
             else if (response != null && response.has("builds")) {
                 JsonArray builds = response.getAsJsonArray("builds");
@@ -87,22 +87,26 @@ public class UpdateChecker {
                 for (JsonElement element : builds) {
                     Build build = gson.fromJson(element, Build.class);
 
-                    int currentBuild = Integer.parseInt(build.getVersion());
-                    int installedBuild = Integer.parseInt(stringBuildNumber);
+                    int currentBuildNumber = 0, installedBuildNumber = 0;
+                    try {
+                        currentBuildNumber = Integer.parseInt(build.getVersion());
+                        installedBuildNumber = Integer.parseInt(installedBuild);
+                    } catch (Exception ignored) {}
 
-                    if (checkForDevBuilds || build.getType().equals(BuildType.RELEASE) && currentBuild > installedBuild) {
-                        consumer.operation(null, build, installedBuildVersion, stringBuildNumber);
+                    if (checkForDevBuilds || build.getType().equals(BuildType.RELEASE) && currentBuildNumber > installedBuildNumber) {
+                        consumer.operation(null, build, installedVersion, installedBuild);
                         return;
                     }
                 }
 
-                consumer.operation(null, null, installedBuildVersion, stringBuildNumber);
+                consumer.operation(null, null, installedVersion, installedBuild);
             }
             else {
-                consumer.operation(null, null, installedBuildVersion, stringBuildNumber);
+                consumer.operation(null, null, installedVersion, installedBuild);
             }
         } catch (Exception e) {
-            consumer.operation(e, null, installedBuildVersion, stringBuildNumber);
+            e.printStackTrace();
+            consumer.operation(e, null, installedVersion, installedBuild);
         }
     }
 }
