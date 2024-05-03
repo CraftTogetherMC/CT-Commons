@@ -1,7 +1,7 @@
 package de.crafttogether.common.util;
 
 import com.google.common.io.ByteStreams;
-import de.crafttogether.CTCommons;
+import de.crafttogether.ctcommons.CTCommonsBukkit;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -53,6 +53,6 @@ public class PluginUtil {
     }
 
     public static BukkitAudiences adventure() {
-        return CTCommons.plugin.adventure();
+        return CTCommonsBukkit.plugin.adventure();
     }
 }

@@ -1,5 +1,6 @@
 package de.crafttogether.common.localization;
 
+import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.util.CommonUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @SuppressWarnings({"unused", "deprecation"})
 public class LocalizationManager {
-    private final Plugin plugin;
+    private final PlatformAbstractionLayer platform;
 
     private final Class<? extends ILocalizationDefault> localization;
     private final String defaultLocale;
@@ -30,16 +31,16 @@ public class LocalizationManager {
     private List<Placeholder> placeholders = new ArrayList<>();
     private List<TagResolver> tagResolvers = new ArrayList<>();
 
-    public LocalizationManager(Plugin plugin, Class<? extends ILocalizationDefault> localization, String defaultLocale, String localeFolder) {
-        this.plugin = plugin;
+    public LocalizationManager(PlatformAbstractionLayer platform, Class<? extends ILocalizationDefault> localization, String defaultLocale, String localeFolder) {
+        this.platform = platform;
         this.localization = localization;
         this.defaultLocale = defaultLocale;
         this.localeKey = defaultLocale;
-        this.localeFolder = plugin.getDataFolder() + File.separator + localeFolder;
+        this.localeFolder = platform.getPluginInformation().getDataFolder() + File.separator + localeFolder;
         this.localeFile = this.localeFolder + File.separator + defaultLocale + ".yml";
 
         // Set up information header
-        setHeader("Below are the localization nodes set for plugin '" + this.plugin.getName() + "'.");
+        setHeader("Below are the localization nodes set for plugin '" + platform.getPluginInformation().getName() + "'.");
         addHeader("For colors and text-formatting use the MiniMessage format.");
         addHeader("https://docs.adventure.kyori.net/minimessage/format.html");
     }
@@ -51,13 +52,13 @@ public class LocalizationManager {
 
         File folder = new File(this.localeFolder);
         if ((!folder.exists() || folder.isFile()) && folder.mkdir())
-            this.plugin.getLogger().info("Created folder: '" + this.localeFolder + "'");
+            platform.getPluginLogger().info("Created folder: '" + this.localeFolder + "'");
 
         if (!new File(this.localeFile).exists()) {
             this.localizationConfig.options().header(this.getHeaderString());
 
             if (!localeKey.equals(this.defaultLocale)) {
-                this.plugin.getLogger().warning("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
+                platform.getPluginLogger().warn("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
                 this.loadLocalization(this.defaultLocale);
                 return;
             }
@@ -74,25 +75,25 @@ public class LocalizationManager {
         try {
             this.localizationConfig.load(this.localeFile);
         } catch (IOException e) {
-            this.plugin.getLogger().warning("Failed reading locale file: '" + this.localeFile + "'");
-            this.plugin.getLogger().warning(e.getMessage());
+            platform.getPluginLogger().warn("Failed reading locale file: '" + this.localeFile + "'");
+            platform.getPluginLogger().warn(e.getMessage());
         } catch (InvalidConfigurationException e) {
-            this.plugin.getLogger().warning("Failed parsing locale file: '" + this.localeFile + "'");
-            this.plugin.getLogger().warning(e.getMessage());
+            platform.getPluginLogger().warn("Failed parsing locale file: '" + this.localeFile + "'");
+            platform.getPluginLogger().warn(e.getMessage());
         }
     }
 
     public void saveLocalization() {
         if (this.localizationConfig == null) {
-            this.plugin.getLogger().warning("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
+            platform.getPluginLogger().warn("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
             return;
         }
 
         try {
             this.localizationConfig.save(this.localeFile);
         } catch (IOException e) {
-            this.plugin.getLogger().warning("Failed saving locale file: '" + this.localeFile + "'");
-            this.plugin.getLogger().warning(e.getMessage());
+            platform.getPluginLogger().warn("Failed saving locale file: '" + this.localeFile + "'");
+            platform.getPluginLogger().warn(e.getMessage());
         }
     }
 
@@ -149,7 +150,7 @@ public class LocalizationManager {
     }
 
     public void setLocaleFolder(String localeFolder) {
-        this.localeFolder = this.plugin.getDataFolder() + File.separator + localeFolder;
+        this.localeFolder = platform.getPluginInformation().getDataFolder() + File.separator + localeFolder;
         this.localeFile = this.localeFolder + File.separator + this.defaultLocale + ".yml";
     }
 

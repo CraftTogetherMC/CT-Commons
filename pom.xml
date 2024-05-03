@@ -15,7 +15,9 @@
 
     <properties>
         <java.version>17</java.version>
-        <project.spigot.version>1.20.4-R0.1-SNAPSHOT</project.spigot.version>
+        <paper.version>1.20.4-R0.1-SNAPSHOT</paper.version>
+        <waterfall.version>1.20-R0.1-SNAPSHOT</waterfall.version>
+        <velocity.version>3.3.0-SNAPSHOT</velocity.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>NO-CI</project.build.number>
     </properties>
@@ -36,8 +38,8 @@
 
     <repositories>
         <repository>
-            <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>sonatype</id>
@@ -47,10 +49,53 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>${project.spigot.version}</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.waterfallmc</groupId>
+            <artifactId>waterfall-api</artifactId>
+            <version>${waterfall.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.velocitypowered</groupId>
+            <artifactId>velocity-api</artifactId>
+            <version>${velocity.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Platform-abstraction-layer -->
+        <dependency>
+            <groupId>de.crafttogether</groupId>
+            <artifactId>platform-abstraction-layer-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.crafttogether</groupId>
+            <artifactId>platform-abstraction-layer-bukkit</artifactId>
+            <version>5.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.crafttogether</groupId>
+            <artifactId>platform-abstraction-layer-bungeecord</artifactId>
+            <version>5.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.crafttogether</groupId>
+            <artifactId>platform-abstraction-layer-velocity</artifactId>
+            <version>5.0.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- MySQL -->
@@ -91,6 +136,12 @@
 
         <dependency>
             <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bungeecord</artifactId>
+            <version>4.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
             <version>4.16.0</version>
             <scope>compile</scope>
@@ -114,6 +165,20 @@
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bungeecord</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-velocity</artifactId>
             <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>

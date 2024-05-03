@@ -1,6 +1,5 @@
 package de.crafttogether.ctcommons;
 
-import de.crafttogether.CTCommons;
 import de.crafttogether.common.localization.LocalizationEnum;
 import de.crafttogether.common.localization.LocalizationManager;
 
@@ -31,6 +30,6 @@ public class Localization extends LocalizationEnum {
 
     @Override
     public LocalizationManager getManager() {
-        return CTCommons.plugin.getLocalizationManager();
+        return CTCommonsBukkit.plugin.getLocalizationManager();
     }
 }
