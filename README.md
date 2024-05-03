@@ -38,6 +38,7 @@ This is a library we use to create plugins for the [CraftTogetherMC](https://git
 ```
 
 ### Includes:
+- [Platform-abstraction-Layer](https://github.com/J0schlZ/Platform-abstraction-layer) (Library for abstracting away some server platform specific implementations)
 - [HikariCP](https://github.com/brettwooldridge/HikariCP) (High-performance, JDBC connection pool)
 - [MariaDB Connector/J](https://mariadb.com/kb/en/about-mariadb-connector-j/) (JDBC-Driver)
 - [Adventure](https://docs.adventure.kyori.net) (Very neat UI-Framework for Bukkit/Bungeecord and more)
