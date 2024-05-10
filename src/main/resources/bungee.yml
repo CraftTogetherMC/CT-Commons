@@ -1,0 +1,7 @@
+name: CTCommons
+version: ${project.version}
+build: ${project.build.number}
+main: de.crafttogether.ctcommons.CTCommonsBungee
+author: J0schlZ
+description: Library to centralize main functions for multiple plugins which will allow better maintaining capabilities and will lower general plugin sizes.
+website: https://github.com/CraftTogetherMC

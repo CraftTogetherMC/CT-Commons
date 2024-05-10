@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 
 @Plugin(
-        id = "${project.artifactId}",
-        name = "${project.name}",
-        version = "${project.version}"
+        id = "ctcommons",
+        name = "CTCommons",
+        version = "1.0-BETA3"
 )
 public class CTCommonsVelocity {
     public static CTCommonsVelocity plugin;
@@ -42,7 +42,7 @@ public class CTCommonsVelocity {
 
         // Startup
         CTCommons.onEnable(platform);
-        localizationManager = CTCommons.localizationManager;
+        localizationManager = CTCommons.getLocalizationManager();
     }
 
     public LocalizationManager getLocalizationManager() {

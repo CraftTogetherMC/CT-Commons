@@ -25,7 +25,7 @@ public final class CTCommonsBukkit extends JavaPlugin {
 
         // Startup
         CTCommons.onEnable(platform);
-        localizationManager = CTCommons.localizationManager;
+        localizationManager = CTCommons.getLocalizationManager();
     }
 
     @Override

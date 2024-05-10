@@ -1,6 +1,8 @@
 package de.crafttogether.common.mysql;
 
 import com.zaxxer.hikari.HikariDataSource;
+import de.crafttogether.common.Logging;
+import de.crafttogether.ctcommons.CTCommons;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +11,6 @@ import java.sql.*;
 
 @SuppressWarnings("unused")
 public class MySQLConnection {
-    private final Plugin plugin;
     private final MySQLAdapter adapter;
     private final HikariDataSource dataSource;
 
@@ -21,14 +22,13 @@ public class MySQLConnection {
         void operation(E exception, V result);
     }
 
-    MySQLConnection(MySQLAdapter adapter, HikariDataSource dataSource, Plugin plugin) {
+    MySQLConnection(MySQLAdapter adapter, HikariDataSource dataSource) {
         this.adapter = adapter;
         this.dataSource = dataSource;
-        this.plugin = plugin;
     }
 
     private void executeAsync(Runnable task) {
-        Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, task);
+        CTCommons.getPlatform().getRunnableFactory().create(task).runTaskAsynchronously();
     }
 
     public ResultSet query(String statement, final Object... args) throws SQLException {
@@ -169,7 +169,7 @@ public class MySQLConnection {
         try {
             return this.connection != null && !this.connection.isClosed() && this.connection.isValid(1);
         } catch (SQLException e) {
-            this.plugin.getLogger().warning(e.getCause().getMessage());
+            Logging.getLogger().warn(e.getCause().getMessage(), e);
             e.printStackTrace();
             return false;
         }
@@ -181,7 +181,7 @@ public class MySQLConnection {
                 this.resultSet.close();
                 this.resultSet = null;
             } catch (SQLException e) {
-                this.plugin.getLogger().warning(e.getCause().getMessage());
+                Logging.getLogger().warn(e.getCause().getMessage(), e);
                 e.printStackTrace();
             }
         }
@@ -191,7 +191,7 @@ public class MySQLConnection {
                 this.preparedStatement.close();
                 this.preparedStatement = null;
             } catch (SQLException e) {
-                this.plugin.getLogger().warning(e.getCause().getMessage());
+                Logging.getLogger().warn(e.getCause().getMessage(), e);
                 e.printStackTrace();
             }
         }
@@ -201,7 +201,7 @@ public class MySQLConnection {
                 this.connection.close();
                 this.connection = null;
             } catch (SQLException e) {
-                this.plugin.getLogger().warning(e.getCause().getMessage());
+                Logging.getLogger().warn(e.getCause().getMessage(), e);
                 e.printStackTrace();
             }
         }

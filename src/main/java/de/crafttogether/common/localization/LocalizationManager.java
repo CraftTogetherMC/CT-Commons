@@ -1,14 +1,14 @@
 package de.crafttogether.common.localization;
 
+import de.crafttogether.common.Logging;
+import de.crafttogether.common.configuration.InvalidConfigurationException;
+import de.crafttogether.common.configuration.file.YamlConfiguration;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.util.CommonUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,13 +52,13 @@ public class LocalizationManager {
 
         File folder = new File(this.localeFolder);
         if ((!folder.exists() || folder.isFile()) && folder.mkdir())
-            platform.getPluginLogger().info("Created folder: '" + this.localeFolder + "'");
+            Logging.getLogger().info("Created folder: '" + this.localeFolder + "'");
 
         if (!new File(this.localeFile).exists()) {
             this.localizationConfig.options().header(this.getHeaderString());
 
             if (!localeKey.equals(this.defaultLocale)) {
-                platform.getPluginLogger().warn("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
+                Logging.getLogger().warn("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
                 this.loadLocalization(this.defaultLocale);
                 return;
             }
@@ -75,25 +75,25 @@ public class LocalizationManager {
         try {
             this.localizationConfig.load(this.localeFile);
         } catch (IOException e) {
-            platform.getPluginLogger().warn("Failed reading locale file: '" + this.localeFile + "'");
-            platform.getPluginLogger().warn(e.getMessage());
+            Logging.getLogger().warn("Failed reading locale file: '" + this.localeFile + "'", e);
+            Logging.getLogger().warn(e.getMessage(), e);
         } catch (InvalidConfigurationException e) {
-            platform.getPluginLogger().warn("Failed parsing locale file: '" + this.localeFile + "'");
-            platform.getPluginLogger().warn(e.getMessage());
+            Logging.getLogger().warn("Failed parsing locale file: '" + this.localeFile + "'", e);
+            Logging.getLogger().warn(e.getMessage(), e);
         }
     }
 
     public void saveLocalization() {
         if (this.localizationConfig == null) {
-            platform.getPluginLogger().warn("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
+            Logging.getLogger().warn("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
             return;
         }
 
         try {
             this.localizationConfig.save(this.localeFile);
         } catch (IOException e) {
-            platform.getPluginLogger().warn("Failed saving locale file: '" + this.localeFile + "'");
-            platform.getPluginLogger().warn(e.getMessage());
+            Logging.getLogger().warn("Failed saving locale file: '" + this.localeFile + "'", e);
+            Logging.getLogger().warn(e.getMessage());
         }
     }
 

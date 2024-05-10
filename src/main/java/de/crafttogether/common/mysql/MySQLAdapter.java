@@ -3,6 +3,9 @@ package de.crafttogether.common.mysql;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
+import de.crafttogether.common.Logging;
+import de.crafttogether.common.plugin.PlatformAbstractionLayer;
+import de.crafttogether.ctcommons.CTCommons;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,21 +14,21 @@ import java.util.logging.Logger;
 
 @SuppressWarnings("unused")
 public class MySQLAdapter {
-    private final Plugin plugin;
+    private final PlatformAbstractionLayer platform;
     private final HikariConfig config;
     private HikariDataSource dataSource;
 
     String tablePrefix;
 
-    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix) {
-        this.plugin = plugin;
+    public MySQLAdapter(PlatformAbstractionLayer platform, HikariConfig config, @Nullable String tablePrefix) {
+        this.platform = platform;
         this.config = config;
         this.tablePrefix = tablePrefix;
         this.createDataSource();
     }
 
-    public MySQLAdapter(Plugin plugin, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
-        this.plugin = plugin;
+    public MySQLAdapter(PlatformAbstractionLayer platform, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
+        this.platform = platform;
         this.config = new HikariConfig();
         this.tablePrefix = tablePrefix;
 
@@ -39,7 +42,7 @@ public class MySQLAdapter {
         this.config.setDriverClassName("de.crafttogether.common.dep.org.mariadb.jdbc.Driver");
         this.config.setUsername(username);
         this.config.setPassword(password);
-        this.config.setPoolName("[" + plugin.getDescription().getName() + "/MySQL-Pool]");
+        this.config.setPoolName("[" + platform.getPluginInformation().getName() + "/MySQL-Pool]");
         this.config.setMaximumPoolSize(10);
         this.config.setMinimumIdle(1);
         this.config.setIdleTimeout(10000);
@@ -57,15 +60,15 @@ public class MySQLAdapter {
 
         try { this.dataSource = new HikariDataSource(this.config); }
         catch (Exception e) {
-            this.plugin.getLogger().warning("Can't connect to MySQL-Server!");
-            this.plugin.getLogger().warning(e.getCause().getMessage());
+            Logging.getLogger().warn("Can't connect to MySQL-Server!", e);
+            Logging.getLogger().warn(e.getCause().getMessage());
         }
     }
 
     public MySQLConnection getConnection() {
         if (this.dataSource == null)
             return null;
-        return new MySQLConnection(this, this.dataSource, this.plugin);
+        return new MySQLConnection(this, this.dataSource);
     }
 
     public boolean isActive() {

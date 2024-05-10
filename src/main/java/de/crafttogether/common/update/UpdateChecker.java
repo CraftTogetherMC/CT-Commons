@@ -1,19 +1,22 @@
 package de.crafttogether.common.update;
 
 import com.google.gson.*;
+import de.crafttogether.common.configuration.Configuration;
+import de.crafttogether.common.configuration.file.FileConfiguration;
+import de.crafttogether.common.configuration.file.YamlConfiguration;
+import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.util.CommonUtil;
-import de.crafttogether.common.util.PluginUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.InputStreamReader;
 
 /**
  * Retrieve update information from api.craft-together.de
  **/
 
 public class UpdateChecker {
-    private final Plugin plugin;
+    private final PlatformAbstractionLayer platform;
 
     /**
      *
@@ -28,14 +31,14 @@ public class UpdateChecker {
         void operation(@Nullable Exception error, @Nullable Build build, String installedVersion, String installedBuild);
     }
 
-    public class UpdateFailedExeption extends Exception {
+    public static class UpdateFailedExeption extends Exception {
         public UpdateFailedExeption(String errorMessage) {
             super(errorMessage);
         }
     }
 
-    public UpdateChecker(Plugin plugin) {
-        this.plugin = plugin;
+    public UpdateChecker(PlatformAbstractionLayer platform) {
+        this.platform = platform;
     }
 
     /**
@@ -43,7 +46,7 @@ public class UpdateChecker {
      * @param checkForDevBuilds
      */
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds) {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds));
+        platform.getRunnableFactory().create(() -> checkUpdatesSync(consumer, checkForDevBuilds)).runTaskAsynchronously();
     }
 
     /**
@@ -52,7 +55,7 @@ public class UpdateChecker {
      * @param delay
      */
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds, long delay) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(this.plugin, () -> checkUpdatesSync(consumer, checkForDevBuilds), delay);
+        platform.getRunnableFactory().create(() -> checkUpdatesSync(consumer, checkForDevBuilds)).runTaskLaterAsynchronously(delay);
     }
 
     /**
@@ -63,12 +66,11 @@ public class UpdateChecker {
         Gson gson = new Gson();
         String json;
 
-        String installedVersion = this.plugin.getDescription().getVersion();
-        Configuration pluginDescription = PluginUtil.getPluginFile(this.plugin);
-        String installedBuild = pluginDescription.get("build") == null ? "unkown" : String.valueOf(pluginDescription.get("build"));
+        String installedVersion = platform.getPluginInformation().getVersion();
+        String installedBuild = platform.getPluginInformation().getBuild();
 
         try {
-            json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + plugin.getDescription().getName());
+            json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + platform.getPluginInformation().getName());
         } catch (Exception e) {
             consumer.operation(e, null, installedVersion, installedBuild);
             return;

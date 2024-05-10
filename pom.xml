@@ -98,27 +98,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- MySQL -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>5.1.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>3.3.3</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.waffle</groupId>
-                    <artifactId>waffle-jna</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!-- Kyori -->
         <dependency>
             <groupId>net.kyori</groupId>
@@ -161,7 +140,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Other -->
+        <!-- B-Stats -->
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
@@ -183,11 +162,47 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- MySQL -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.3.3</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.waffle</groupId>
+                    <artifactId>waffle-jna</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Other -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.23.1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.9</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.3</version>
         </dependency>
 
         <dependency>
@@ -236,16 +251,24 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
-                            <pattern>org.mariadb.jdbc</pattern>
-                            <shadedPattern>de.crafttogether.common.dep.org.mariadb.jdbc</shadedPattern>
-                        </relocation>
-                        <relocation>
                             <pattern>net.kyori</pattern>
                             <shadedPattern>de.crafttogether.common.dep.net.kyori</shadedPattern>
                         </relocation>
                         <relocation>
+                            <pattern>de.exlll</pattern>
+                            <shadedPattern>de.crafttogether.common.dep.de.exlll</shadedPattern>
+                        </relocation>
+                        <relocation>
                             <pattern>org.bstats</pattern>
                             <shadedPattern>de.crafttogether.common.dep.org.bstats</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.mariadb.jdbc</pattern>
+                            <shadedPattern>de.crafttogether.common.dep.org.mariadb.jdbc</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.yaml</pattern>
+                            <shadedPattern>de.crafttogether.common.dep.org.yaml</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

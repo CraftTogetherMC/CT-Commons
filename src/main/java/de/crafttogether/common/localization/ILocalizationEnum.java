@@ -1,16 +1,21 @@
 package de.crafttogether.common.localization;
 
-import de.crafttogether.common.util.PluginUtil;
+import de.crafttogether.ctcommons.CTCommonsBukkit;
+import de.crafttogether.ctcommons.CTCommonsBungee;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 public interface ILocalizationEnum extends ILocalizationDefault {
 
-    default void message(CommandSender sender, Placeholder... arguments) {
-        PluginUtil.adventure().sender(sender).sendMessage(deserialize(arguments));
+    default void message(org.bukkit.command.CommandSender sender, Placeholder... arguments) {
+        CTCommonsBukkit.adventure.sender(sender).sendMessage(deserialize(arguments));
+    }
+
+    default void message(net.md_5.bungee.api.CommandSender sender, Placeholder... arguments) {
+        CTCommonsBungee.adventure.sender(sender).sendMessage(deserialize(arguments));
     }
 
     default Component deserialize(List<Placeholder> resolvers) {

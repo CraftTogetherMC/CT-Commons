@@ -30,6 +30,6 @@ public class Localization extends LocalizationEnum {
 
     @Override
     public LocalizationManager getManager() {
-        return CTCommonsBukkit.plugin.getLocalizationManager();
+        return CTCommons.getLocalizationManager();
     }
 }

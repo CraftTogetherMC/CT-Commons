@@ -26,7 +26,12 @@ public abstract class LocalizationEnum implements ILocalizationEnum {
     }
 
     @Override
-    public void message(CommandSender sender, Placeholder... arguments) {
+    public void message(org.bukkit.command.CommandSender sender, Placeholder... arguments) {
+        ILocalizationEnum.super.message(sender, arguments);
+    }
+
+    @Override
+    public void message(net.md_5.bungee.api.CommandSender sender, Placeholder... arguments) {
         ILocalizationEnum.super.message(sender, arguments);
     }
 

@@ -25,7 +25,7 @@ public final class CTCommonsBungee extends Plugin {
 
         // Startup
         CTCommons.onEnable(platform);
-        localizationManager = CTCommons.localizationManager;
+        localizationManager = CTCommons.getLocalizationManager();
     }
 
     @Override

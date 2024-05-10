@@ -1,22 +1,22 @@
 package de.crafttogether.ctcommons;
 
+import de.crafttogether.common.configuration.file.FileConfiguration;
 import de.crafttogether.common.localization.LocalizationManager;
 import de.crafttogether.common.mysql.LogFilter;
+import de.crafttogether.common.plugin.Platform;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.plugin.PluginInformation;
 import de.crafttogether.common.update.BuildType;
 import de.crafttogether.common.update.UpdateChecker;
+import de.crafttogether.common.util.PluginUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 public class CTCommons {
-    public static LocalizationManager localizationManager;
+    private static LocalizationManager localizationManager;
 
     private static PlatformAbstractionLayer platform;
-    private static Configuration config;
+    private static FileConfiguration config;
 
     protected static void onEnable(PlatformAbstractionLayer _platform) {
         platform = _platform;
@@ -27,14 +27,24 @@ public class CTCommons {
         // Create default config
 
         //TODO: Config
-        makeConfig("config.yml");
+        InputStream defaultConfig;
+        if (platform.getPlatform().equals(Platform.BUNGEECORD) || platform.getPlatform().equals(Platform.VELOCITY)) {
+            defaultConfig = platform.getPluginInformation().getResourceFromJar("proxyconfig.yml");
+        }
+        else {
+            defaultConfig = platform.getPluginInformation().getResourceFromJar("config.yml");
+        }
+
+        PluginUtil.saveDefaultConfig(platform, defaultConfig);
+        config = PluginUtil.getConfig(platform);
+
 
         //TODO: Commands
         //registerCommand("ctcommons", this);
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager(platform, Localization.class, "en_EN", "locales");
-        localizationManager.loadLocalization(getConfig().getString("Settings.Language"));
+        localizationManager.loadLocalization(config.getString("Settings.Language"));
         localizationManager.addTagResolver("prefix", Localization.PREFIX.deserialize());
 
         //TODO: Events
@@ -42,10 +52,10 @@ public class CTCommons {
         //getServer().getPluginManager().registerEvents(this, this);
 
         // Check for updates
-        if (!getConfig().getBoolean("Settings.Updates.Notify.DisableNotifications")
-                && getConfig().getBoolean("Settings.Updates.Notify.Console"))
+        if (!config.getBoolean("Updates.Notify.DisableNotifications")
+                && config.getBoolean("Updates.Notify.Console"))
         {
-            new UpdateChecker(this).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
+            new UpdateChecker(platform).checkUpdatesAsync((err, build, currentVersion, currentBuild) -> {
                 if (err != null) {
                     platform.getPluginLogger().warn(" An error occurred while receiving update information.");
                     platform.getPluginLogger().warn("Error: " + err.getMessage());
@@ -68,46 +78,27 @@ public class CTCommons {
                     platform.getPluginLogger().warn("FileName: " + build.getFileName() + " FileSize: " + build.getHumanReadableFileSize());
                     platform.getPluginLogger().warn("You are on version: " + currentVersion + " (build: " + currentBuild + ")");
                 }).runTask();
-            }, getConfig().getBoolean("Settings.Updates.CheckForDevBuilds"));
+            }, config.getBoolean("Updates.CheckForDevBuilds"));
         }
 
-        Configuration pluginDescriptionFile = new net.md_5.bungee.config.Configuration()
-        (platform.getPluginInformation().getDataFolder() + File.separator + "config.yml").getString("build");
         PluginInformation pluginInformation = platform.getPluginInformation();
-        platform.getPluginLogger().info(pluginInformation.getName() + " v" + pluginInformation.getVersion() + " (" + build + ") enabled.");
+        platform.getPluginLogger().info(pluginInformation.getName() + " v" + pluginInformation.getVersion() + " (" + pluginInformation.getBuild() + ") enabled.");
     }
 
     protected static void onDisable(PlatformAbstractionLayer platform) {
         PluginInformation pluginInformation = platform.getPluginInformation();
-        platform.getPluginLogger().info(pluginInformation.getName() + " v" + pluginInformation.getVersion() + " disabled.");
+        platform.getPluginLogger().info(pluginInformation.getName() + " v" + platform.getPluginInformation().getVersion() + " disabled.");
     }
 
-    protected static void makeConfig(String fileName) {
-        File dataFolder = platform.getPluginInformation().getDataFolder();
-        // Create plugin config folder if it doesn't exist
-        if (!dataFolder.exists()) {
-            platform.getPluginLogger().info("Created config folder: " + dataFolder.mkdir());
-        }
-
-        File configFile = new File(dataFolder, fileName);
-
-        // Copy default config if it doesn't exist
-        if (!configFile.exists()) {
-            try {
-                FileOutputStream outputStream = new FileOutputStream(configFile);
-                InputStream templateFile = platform.getPluginInformation().getResourceFromJar(fileName);
-                templateFile.transferTo(outputStream);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public static LocalizationManager getLocalizationManager() {
+        return localizationManager;
     }
 
-    protected static Configuration getConfig() {
-        if (config == null) {
-            config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml"));
-        }
+    public static FileConfiguration getConfig() {
         return config;
+    }
+
+    public static PlatformAbstractionLayer getPlatform() {
+        return platform;
     }
 }
