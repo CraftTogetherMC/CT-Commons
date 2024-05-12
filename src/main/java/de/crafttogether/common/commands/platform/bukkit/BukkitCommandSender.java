@@ -1,22 +1,22 @@
-package de.crafttogether.common.cloud.platform.bungeecord;
+package de.crafttogether.common.commands.platform.bukkit;
 
-import de.crafttogether.common.cloud.AbstractCommandSender;
-import de.crafttogether.ctcommons.CTCommonsBungee;
+import de.crafttogether.common.commands.AbstractCommandSender;
+import de.crafttogether.ctcommons.CTCommonsBukkit;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class BungeeCommandSender extends AbstractCommandSender<CommandSender> {
+public class BukkitCommandSender extends AbstractCommandSender<CommandSender> {
     private final Audience audience;
     private final CommandSender sender;
 
-    public BungeeCommandSender(CommandSender sender) {
+    public BukkitCommandSender(CommandSender sender) {
         super(sender);
         this.sender = sender;
-        this.audience = CTCommonsBungee.adventure.sender(sender);
+        this.audience = CTCommonsBukkit.adventure.sender(sender);
     }
 
     @Override
@@ -26,8 +26,8 @@ public class BungeeCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public UUID getUniqueId() {
-        if (super.delegate instanceof ProxiedPlayer) {
-            return ((ProxiedPlayer) super.delegate).getUniqueId();
+        if (super.delegate instanceof Player) {
+            return ((Player) super.delegate).getUniqueId();
         }
         return null;
     }

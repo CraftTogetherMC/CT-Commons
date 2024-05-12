@@ -1,10 +1,8 @@
-package de.crafttogether.common.cloud.platform.velocity;
+package de.crafttogether.common.commands.platform.velocity;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import de.crafttogether.common.cloud.AbstractCommandSender;
-import de.crafttogether.ctcommons.CTCommonsBungee;
-import de.crafttogether.ctcommons.CTCommonsVelocity;
+import de.crafttogether.common.commands.AbstractCommandSender;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 

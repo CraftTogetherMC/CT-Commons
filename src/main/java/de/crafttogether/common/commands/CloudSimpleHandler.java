@@ -1,4 +1,4 @@
-package de.crafttogether.common.cloud;
+package de.crafttogether.common.commands;
 
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;

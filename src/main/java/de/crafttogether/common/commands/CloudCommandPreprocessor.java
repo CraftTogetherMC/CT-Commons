@@ -1,4 +1,4 @@
-package de.crafttogether.common.cloud;
+package de.crafttogether.common.commands;
 
 import java.util.LinkedList;
 

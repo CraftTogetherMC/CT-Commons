@@ -3,7 +3,7 @@ package de.crafttogether.ctcommons.commands;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import de.crafttogether.common.Logging;
-import de.crafttogether.common.cloud.CommandSender;
+import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.ctcommons.CTCommons;
 import de.crafttogether.ctcommons.Localization;
 

@@ -1,11 +1,10 @@
-package de.crafttogether.common.cloud.platform.bungeecord;
+package de.crafttogether.common.commands.platform.velocity;
 
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.annotations.injection.ParameterInjector;
 import cloud.commandframework.arguments.parser.*;
-import cloud.commandframework.bungee.BungeeCommandManager;
 import cloud.commandframework.captions.Caption;
 import cloud.commandframework.captions.SimpleCaptionRegistry;
 import cloud.commandframework.context.CommandContext;
@@ -15,17 +14,20 @@ import cloud.commandframework.execution.postprocessor.CommandPostprocessor;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.services.PipelineException;
-import de.crafttogether.common.cloud.CloudCommandPreprocessor;
-import de.crafttogether.common.cloud.CloudLocalizedException;
-import de.crafttogether.common.cloud.CloudSimpleHandler;
-import de.crafttogether.common.cloud.CommandSender;
+import cloud.commandframework.velocity.VelocityCommandManager;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.proxy.ProxyServer;
+import de.crafttogether.common.Logging;
+import de.crafttogether.common.commands.CloudCommandPreprocessor;
+import de.crafttogether.common.commands.CloudLocalizedException;
+import de.crafttogether.common.commands.CloudSimpleHandler;
+import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.common.localization.LocalizationEnum;
 import de.crafttogether.common.util.CommonUtil;
-import de.crafttogether.ctcommons.CTCommonsBungee;
+import de.crafttogether.ctcommons.CTCommonsVelocity;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.plugin.Plugin;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -35,7 +37,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 
 /**
  * Configures the Cloud Command Framework for basic use inside a Bungeecord or
@@ -46,8 +47,8 @@ import java.util.logging.Level;
  * From annotation-registered commands you can obtain your plugin instance easily,
  * as it is made available through an injector by default.
  */
-public class CloudBungeeHandler implements CloudSimpleHandler {
-    private BungeeCommandManager<CommandSender> manager;
+public class CloudVelocityHandler implements CloudSimpleHandler {
+    private VelocityCommandManager<CommandSender> manager;
     private AnnotationParser<CommandSender> annotationParser;
 
     @Override
@@ -59,16 +60,16 @@ public class CloudBungeeHandler implements CloudSimpleHandler {
      * Enables and initializes the Cloud Command Framework. After this is
      * called, commands and other things can be registered.
      *
-     * @param plugin Owning Bungeecord Plugin for this handler
+     * @param proxy for this handler
      */
 
-    public void enable(Plugin plugin) {
+    public void enable(ProxyServer proxy) {
         try {
-            this.manager = new BungeeCommandManager<>(
-                    /* Owning plugin */ plugin,
+            this.manager = new VelocityCommandManager<>(
+                    /* Owning plugin */ proxy,
                     /* Coordinator function */ CommandExecutionCoordinator.simpleCoordinator(),
-                    /* Command Sender -> C */ CloudBungeeHandler::getCommandSender,
-                    /* C -> Command Sender */ (sender) -> ((BungeeCommandSender) sender).getSender()
+                    /* Command Sender -> C */ CloudVelocityHandler::getCommandSender,
+                    /* C -> Command Sender */ (sender) -> ((VelocityCommandSender) sender).getSender()
             );
         } catch (final Exception e) {
             throw new IllegalStateException("Failed to initialize the command manager", e);
@@ -109,11 +110,11 @@ public class CloudBungeeHandler implements CloudSimpleHandler {
         if (isEnabled())
             return;
 
-        enable(CTCommonsBungee.plugin);
+        enable(CTCommonsVelocity.proxy);
     }
 
-    private static CommandSender getCommandSender(net.md_5.bungee.api.CommandSender bungeeCommandSender) {
-        return new BungeeCommandSender(bungeeCommandSender);
+    private static CommandSender getCommandSender(CommandSource velocityCommandSource) {
+        return new VelocityCommandSender(velocityCommandSource);
     }
 
     @Override
@@ -134,8 +135,7 @@ public class CloudBungeeHandler implements CloudSimpleHandler {
         }
 
         // Default fallback
-        this.manager.getOwningPlugin().getLogger().log(Level.SEVERE,
-                "Exception executing command handler", cause);
+        Logging.getLogger().info("Exception executing command handler: " + cause);
         sender.sendMessage(Component.text("An internal error occurred while attempting to perform this command.").color(NamedTextColor.RED));
     }
 

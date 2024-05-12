@@ -1,4 +1,4 @@
-package de.crafttogether.common.cloud;
+package de.crafttogether.common.commands;
 
 public abstract class AbstractCommandSender<S> implements CommandSender {
     protected final S delegate;

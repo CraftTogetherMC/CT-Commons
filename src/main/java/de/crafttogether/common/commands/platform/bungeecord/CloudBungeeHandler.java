@@ -1,14 +1,11 @@
-package de.crafttogether.common.cloud.platform.bukkit;
+package de.crafttogether.common.commands.platform.bungeecord;
 
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.annotations.injection.ParameterInjector;
 import cloud.commandframework.arguments.parser.*;
-import cloud.commandframework.brigadier.CloudBrigadierManager;
-import cloud.commandframework.bukkit.BukkitCommandManager;
-import cloud.commandframework.bukkit.BukkitCommandManager.BrigadierFailureException;
-import cloud.commandframework.bukkit.CloudBukkitCapabilities;
+import cloud.commandframework.bungee.BungeeCommandManager;
 import cloud.commandframework.captions.Caption;
 import cloud.commandframework.captions.SimpleCaptionRegistry;
 import cloud.commandframework.context.CommandContext;
@@ -17,20 +14,18 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.execution.postprocessor.CommandPostprocessor;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
-import cloud.commandframework.paper.PaperCommandManager;
 import cloud.commandframework.services.PipelineException;
-import de.crafttogether.common.Logging;
-import de.crafttogether.common.cloud.CloudCommandPreprocessor;
-import de.crafttogether.common.cloud.CloudLocalizedException;
-import de.crafttogether.common.cloud.CloudSimpleHandler;
-import de.crafttogether.common.cloud.CommandSender;
+import de.crafttogether.common.commands.CloudCommandPreprocessor;
+import de.crafttogether.common.commands.CloudLocalizedException;
+import de.crafttogether.common.commands.CloudSimpleHandler;
+import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.common.localization.LocalizationEnum;
 import de.crafttogether.common.util.CommonUtil;
-import de.crafttogether.ctcommons.CTCommonsBukkit;
+import de.crafttogether.ctcommons.CTCommonsBungee;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.plugin.Plugin;
+import net.md_5.bungee.api.plugin.Plugin;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -43,16 +38,16 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 
 /**
- * Configures the Cloud Command Framework for basic use inside a Bukkit Paper or
- * Spigot server environment. Initializes the command manager itself as synchronously
+ * Configures the Cloud Command Framework for basic use inside a Bungeecord or
+ * Waterfall server environment. Initializes the command manager itself as synchronously
  * executing (on main thread), registers annotations and help system, and also
  * registers some useful preprocessing logic.
  *
  * From annotation-registered commands you can obtain your plugin instance easily,
  * as it is made available through an injector by default.
  */
-public class CloudBukkitHandler implements CloudSimpleHandler {
-    private BukkitCommandManager<CommandSender> manager;
+public class CloudBungeeHandler implements CloudSimpleHandler {
+    private BungeeCommandManager<CommandSender> manager;
     private AnnotationParser<CommandSender> annotationParser;
 
     @Override
@@ -64,50 +59,21 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      * Enables and initializes the Cloud Command Framework. After this is
      * called, commands and other things can be registered.
      *
-     * @param plugin Owning Bukkit Plugin for this handler
+     * @param plugin Owning Bungeecord Plugin for this handler
      */
 
     public void enable(Plugin plugin) {
-        if (isEnabled())
-            return;
-
         try {
-            this.manager = new PaperCommandManager<>(
+            this.manager = new BungeeCommandManager<>(
                     /* Owning plugin */ plugin,
                     /* Coordinator function */ CommandExecutionCoordinator.simpleCoordinator(),
-                    /* Command Sender -> C */ CloudBukkitHandler::getCommandSender,
-                    /* C -> Command Sender */ (sender) -> ((BukkitCommandSender) sender).getSender()
+                    /* Command Sender -> C */ CloudBungeeHandler::getCommandSender,
+                    /* C -> Command Sender */ (sender) -> ((BungeeCommandSender) sender).getSender()
             );
         } catch (final Exception e) {
             throw new IllegalStateException("Failed to initialize the command manager", e);
         }
 
-        // Register Brigadier mappings
-        if (manager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
-            boolean isStable;
-
-            try {
-                // Paper API added later on to restore legacy behavior. Not present on all versions.
-                Class<?> eventClass = Class.forName("com.destroystokyo.paper.event.brigadier.CommandRegisteredEvent");
-                eventClass.getMethod("isRawCommand");
-                isStable = true;
-            } catch (Throwable t) {
-                isStable = false;
-            }
-
-            if (isStable) {
-                try {
-                    manager.registerBrigadier();
-                    CloudBrigadierManager<?, ?> brig = manager.brigadierManager();
-
-                    assert brig != null;
-                    brig.setNativeNumberSuggestions(false);
-                } catch (BrigadierFailureException ex) {
-                    Logging.getLogger().warn("Failed to register commands using brigadier, " +
-                            "using fallback instead. Error:", ex);
-                }
-            }
-        }
 
         // Registers a custom command preprocessor that handles quote-escaping
         this.manager.registerCommandPreProcessor(new CloudCommandPreprocessor());
@@ -143,10 +109,11 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
         if (isEnabled())
             return;
 
-        enable(CTCommonsBukkit.plugin);
+        enable(CTCommonsBungee.plugin);
     }
-    private static CommandSender getCommandSender(org.bukkit.command.CommandSender bukkitCommandSender) {
-        return new BukkitCommandSender(bukkitCommandSender);
+
+    private static CommandSender getCommandSender(net.md_5.bungee.api.CommandSender bungeeCommandSender) {
+        return new BungeeCommandSender(bungeeCommandSender);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package de.crafttogether.ctcommons;
 
-import de.crafttogether.common.cloud.platform.bukkit.BukkitCommandSender;
 import de.crafttogether.common.plugin.BukkitPlatformLayer;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.ctcommons.listener.bukkit.PlayerJoinListener;
@@ -9,8 +8,6 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.stream.Stream;
 
 public final class CTCommonsBukkit extends JavaPlugin implements CommandExecutor, TabExecutor {
     public static CTCommonsBukkit plugin;
