@@ -2,7 +2,7 @@ package de.crafttogether.ctcommons;
 
 import de.crafttogether.common.plugin.BungeePlatformLayer;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
-import de.crafttogether.ctcommons.listener.bungeecord.PostLoginListener;
+import de.crafttogether.ctcommons.listener.PostLoginListener;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;

@@ -1,20 +1,20 @@
 package de.crafttogether.ctcommons.commands;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
 import de.crafttogether.common.Logging;
 import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.ctcommons.CTCommons;
 import de.crafttogether.ctcommons.Localization;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
 
 public class ReloadCommand {
 
     public ReloadCommand() {
         Logging.getLogger().info("CMD: ReloadCommand loaded!");
     }
-    @CommandMethod("${plugin} reload")
+    @Command("${plugin} reload")
     @CommandDescription("This command reloads the configuration of the plugin")
-    public void tcdestinations_reload(
+    public void ctcommons_reload(
             final CommandSender sender
     ) {
         Logging.getLogger().info("Reloading config.yml...");

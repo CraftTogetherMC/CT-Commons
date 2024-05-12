@@ -1,25 +1,23 @@
 package de.crafttogether.common.commands;
 
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.annotations.injection.ParameterInjector;
-import cloud.commandframework.arguments.parser.ArgumentParseResult;
-import cloud.commandframework.arguments.parser.ArgumentParser;
-import cloud.commandframework.arguments.parser.ParserParameter;
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.captions.Caption;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.execution.postprocessor.CommandPostprocessor;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import de.crafttogether.common.localization.LocalizationEnum;
 import io.leangen.geantyref.TypeToken;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.annotations.PreprocessorMapper;
+import org.incendo.cloud.component.preprocessor.ComponentPreprocessor;
+import org.incendo.cloud.execution.postprocessor.CommandPostprocessor;
+import org.incendo.cloud.injection.ParameterInjector;
+import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.parser.ArgumentParser;
+import org.incendo.cloud.parser.ParserDescriptor;
+import org.incendo.cloud.parser.ParserParameter;
+import org.incendo.cloud.parser.ParserParameters;
+import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Queue;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -28,13 +26,15 @@ public interface CloudSimpleHandler {
 
     void enable();
 
-    void handleException(CommandSender sender, Throwable exception);
+    void handleException(CommandSender sender, Throwable exception) throws Throwable;
 
     AnnotationParser<CommandSender> getParser();
 
     CommandManager<CommandSender> getManager();
 
     void postProcess(CommandPostprocessor<CommandSender> processor);
+
+    <T> void parse(ParserDescriptor<CommandSender, T> descriptor);
 
     <T> void parse(
             Class<T> type,
@@ -57,7 +57,7 @@ public interface CloudSimpleHandler {
 
     void suggest(
             String name,
-            BiFunction<CommandContext<CommandSender>, String, List<String>> suggestionsProvider
+            BlockingSuggestionProvider.Strings<CommandSender> suggestionsProvider
     );
 
     <T> void inject(
@@ -84,18 +84,16 @@ public interface CloudSimpleHandler {
 
     <A extends Annotation> void preprocessAnnotation(
             Class<A> annotation,
-            Function<A, BiFunction<CommandContext<CommandSender>, Queue<String>,
-                    ArgumentParseResult<Boolean>>> preprocessorMapper
+            PreprocessorMapper<A, CommandSender> preprocessorMapper
     );
 
     <A extends Annotation> void preprocessAnnotation(
             Class<A> annotation,
-            BiFunction<CommandContext<CommandSender>, Queue<String>,
-                    ArgumentParseResult<Boolean>> preprocessorMapper
+            ComponentPreprocessor<CommandSender> preprocessorMapper
     );
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    <T extends Throwable> void handle(Class<T> exceptionType, BiConsumer<CommandSender, T> handler);
+    <T extends Throwable> void handle(Class<T> exceptionType, ThrowingBiConsumer<CommandSender, T> handler);
 
     <T extends Throwable> void handleMessage(Class<T> exceptionType, String message);
 
@@ -103,7 +101,7 @@ public interface CloudSimpleHandler {
 
     void captionFromLocalization(Class<? extends LocalizationEnum> localizationDefaults);
 
-    void caption(String regex, BiFunction<Caption, CommandSender, String> messageFactory);
+    void caption(String regex, Function<CommandSender, String> messageFactory);
 
     void caption(String regex, String value);
 

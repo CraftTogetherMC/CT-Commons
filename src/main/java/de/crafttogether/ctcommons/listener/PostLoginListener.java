@@ -1,4 +1,4 @@
-package de.crafttogether.ctcommons.listener.bungeecord;
+package de.crafttogether.ctcommons.listener;
 
 import de.crafttogether.ctcommons.CTCommons;
 import net.md_5.bungee.api.event.PostLoginEvent;

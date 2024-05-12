@@ -1,6 +1,5 @@
 package de.crafttogether.ctcommons;
 
-import cloud.commandframework.annotations.PropertyReplacingStringProcessor;
 import com.google.common.collect.ImmutableMap;
 import de.crafttogether.common.Logging;
 import de.crafttogether.common.commands.CloudSimpleHandler;
@@ -18,6 +17,7 @@ import de.crafttogether.common.update.UpdateChecker;
 import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.commands.ReloadCommand;
 import net.kyori.adventure.text.Component;
+import org.incendo.cloud.annotations.string.PropertyReplacingStringProcessor;
 
 import java.io.InputStream;
 import java.util.ArrayList;

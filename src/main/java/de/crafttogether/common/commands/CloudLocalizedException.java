@@ -1,7 +1,7 @@
 package de.crafttogether.common.commands;
 
-import cloud.commandframework.context.CommandContext;
 import de.crafttogether.common.localization.ILocalizationEnum;
+import org.incendo.cloud.context.CommandContext;
 
 /**
  * An exception that, when thrown, will result in a localized message

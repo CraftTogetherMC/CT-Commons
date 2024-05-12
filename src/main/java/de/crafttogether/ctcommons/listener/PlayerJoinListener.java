@@ -1,4 +1,4 @@
-package de.crafttogether.ctcommons.listener.bukkit;
+package de.crafttogether.ctcommons.listener;
 
 import de.crafttogether.ctcommons.CTCommons;
 import org.bukkit.event.EventHandler;

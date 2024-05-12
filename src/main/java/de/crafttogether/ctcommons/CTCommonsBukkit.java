@@ -2,7 +2,7 @@ package de.crafttogether.ctcommons;
 
 import de.crafttogether.common.plugin.BukkitPlatformLayer;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
-import de.crafttogether.ctcommons.listener.bukkit.PlayerJoinListener;
+import de.crafttogether.ctcommons.listener.PlayerJoinListener;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;

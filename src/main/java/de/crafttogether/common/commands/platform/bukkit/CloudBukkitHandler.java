@@ -1,43 +1,47 @@
 package de.crafttogether.common.commands.platform.bukkit;
 
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.annotations.injection.ParameterInjector;
-import cloud.commandframework.arguments.parser.*;
-import cloud.commandframework.brigadier.CloudBrigadierManager;
-import cloud.commandframework.bukkit.BukkitCommandManager;
-import cloud.commandframework.bukkit.BukkitCommandManager.BrigadierFailureException;
-import cloud.commandframework.bukkit.CloudBukkitCapabilities;
-import cloud.commandframework.captions.Caption;
-import cloud.commandframework.captions.SimpleCaptionRegistry;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.exceptions.CommandExecutionException;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.execution.postprocessor.CommandPostprocessor;
-import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
-import cloud.commandframework.paper.PaperCommandManager;
-import cloud.commandframework.services.PipelineException;
-import de.crafttogether.common.Logging;
-import de.crafttogether.common.commands.CloudCommandPreprocessor;
-import de.crafttogether.common.commands.CloudLocalizedException;
 import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.commands.CommandSender;
+import de.crafttogether.common.commands.ThrowingBiConsumer;
 import de.crafttogether.common.localization.LocalizationEnum;
 import de.crafttogether.common.util.CommonUtil;
 import de.crafttogether.ctcommons.CTCommonsBukkit;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.plugin.Plugin;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.annotations.PreprocessorMapper;
+import org.incendo.cloud.brigadier.CloudBrigadierManager;
+import org.incendo.cloud.bukkit.BukkitCommandManager;
+import org.incendo.cloud.bukkit.BukkitCommandManager.BrigadierInitializationException;
+import org.incendo.cloud.caption.Caption;
+import org.incendo.cloud.caption.CaptionProvider;
+import org.incendo.cloud.component.CommandComponent;
+import org.incendo.cloud.component.preprocessor.ComponentPreprocessor;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.exception.CommandExecutionException;
+import org.incendo.cloud.exception.InjectionException;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.execution.postprocessor.CommandPostprocessor;
+import org.incendo.cloud.injection.ParameterInjector;
+import org.incendo.cloud.meta.CommandMeta;
+import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.parser.ArgumentParser;
+import org.incendo.cloud.parser.ParserDescriptor;
+import org.incendo.cloud.parser.ParserParameter;
+import org.incendo.cloud.parser.ParserParameters;
+import org.incendo.cloud.parser.standard.StringParser;
+import org.incendo.cloud.services.PipelineException;
+import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -54,10 +58,16 @@ import java.util.logging.Level;
 public class CloudBukkitHandler implements CloudSimpleHandler {
     private BukkitCommandManager<CommandSender> manager;
     private AnnotationParser<CommandSender> annotationParser;
+    private final Set<Class<?>> exceptionTypes = new HashSet<>();
 
+    /**
+     * Whether this handler for the Cloud Command Framework has been enabled
+     *
+     * @return True if enabled
+     */
     @Override
     public boolean isEnabled() {
-        return false;
+        return this.manager != null;
     }
 
     /**
@@ -66,77 +76,39 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      *
      * @param plugin Owning Bukkit Plugin for this handler
      */
-
+    @SuppressWarnings("unchecked")
     public void enable(Plugin plugin) {
-        if (isEnabled())
-            return;
-
         try {
             this.manager = new PaperCommandManager<>(
                     /* Owning plugin */ plugin,
-                    /* Coordinator function */ CommandExecutionCoordinator.simpleCoordinator(),
-                    /* Command Sender -> C */ CloudBukkitHandler::getCommandSender,
-                    /* C -> Command Sender */ (sender) -> ((BukkitCommandSender) sender).getSender()
+                    /* Coordinator function */ ExecutionCoordinator.simpleCoordinator(),
+                    /* Command Sender <-> C */ SenderMapper.create(this::getCommandSender, (sender) -> ((BukkitCommandSender) sender).getSender())
             );
         } catch (final Exception e) {
             throw new IllegalStateException("Failed to initialize the command manager", e);
         }
 
-        // Register Brigadier mappings
-        if (manager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
-            boolean isStable;
+        try {
+            manager.registerBrigadier();
+            CloudBrigadierManager<?, ?> brig = manager.brigadierManager();
 
-            try {
-                // Paper API added later on to restore legacy behavior. Not present on all versions.
-                Class<?> eventClass = Class.forName("com.destroystokyo.paper.event.brigadier.CommandRegisteredEvent");
-                eventClass.getMethod("isRawCommand");
-                isStable = true;
-            } catch (Throwable t) {
-                isStable = false;
-            }
-
-            if (isStable) {
-                try {
-                    manager.registerBrigadier();
-                    CloudBrigadierManager<?, ?> brig = manager.brigadierManager();
-
-                    assert brig != null;
-                    brig.setNativeNumberSuggestions(false);
-                } catch (BrigadierFailureException ex) {
-                    Logging.getLogger().warn("Failed to register commands using brigadier, " +
-                            "using fallback instead. Error:", ex);
-                }
-            }
+            brig.setNativeNumberSuggestions(false);
+        } catch (BrigadierInitializationException ex) {
+            plugin.getLogger().log(Level.WARNING, "Failed to register commands using brigadier, " +
+                    "using fallback instead. Error:", ex);
         }
 
-        // Registers a custom command preprocessor that handles quote-escaping
-        this.manager.registerCommandPreProcessor(new CloudCommandPreprocessor());
-
-        // Create the annotation parser. This allows you to define commands using methods annotated with
-        // @CommandMethod
-        final Function<ParserParameters, CommandMeta> commandMetaFunction = p ->
-                CommandMeta.simple()
-                        .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
-                        .build();
+        // Create the annotation parser. This allows you to define commands using methods annotated with @Command
         this.annotationParser = new AnnotationParser<>(
                 /* Manager */ this.manager,
-                /* Command sender type */ CommandSender.class,
-                /* Mapper for command meta instances */ commandMetaFunction
+                /* Command sender type */ CommandSender.class
         );
-
-        // Shows the argname as <argname> as a suggestion
-        // Fix for numeric arguments on the broken brigadier system
-        suggest("argname", (context,b) -> Collections.singletonList("<" + context.getCurrentArgument().getName() + ">"));
 
         // Fixes incorrect exception handling in Cloud, so that user-specified
         // exception types can be used instead.
         handle(CommandExecutionException.class, this::handleException);
         handle(PipelineException.class, this::handleException);
-
-        // Makes LocalizedParserException functional
-        handle(CloudLocalizedException.class, (sender, ex) -> {
-            sender.sendMessage(Component.text(ex.getMessage()));
-        });
+        handle(InjectionException.class, this::handleException);
     }
 
     public void enable() {
@@ -145,31 +117,20 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
 
         enable(CTCommonsBukkit.plugin);
     }
-    private static CommandSender getCommandSender(org.bukkit.command.CommandSender bukkitCommandSender) {
+
+    public CommandSender getCommandSender(org.bukkit.command.CommandSender bukkitCommandSender) {
         return new BukkitCommandSender(bukkitCommandSender);
     }
 
     @Override
-    public void handleException(CommandSender sender, Throwable exception) {
+    public void handleException(CommandSender sender, Throwable exception) throws Throwable {
         Throwable cause = exception.getCause();
-
-        // Find handler for this exception, if registered, execute that handler
-        // If the handler throws, handle it as an internal error
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        BiConsumer<CommandSender, Throwable> handler = manager.getExceptionHandler((Class) cause.getClass());
-        if (handler != null) {
-            try {
-                handler.accept(sender, exception.getCause());
-                return;
-            } catch (Throwable t2) {
-                cause = t2;
-            }
+        if (exceptionTypes.contains(cause.getClass())) {
+            throw cause;
+        } else {
+            // Rethrow to pass to the next handler
+            throw exception;
         }
-
-        // Default fallback
-        this.manager.getOwningPlugin().getLogger().log(Level.SEVERE,
-                "Exception executing command handler", cause);
-        sender.sendMessage(Component.text("An internal error occurred while attempting to perform this command.").color(NamedTextColor.RED));
     }
 
     /**
@@ -204,11 +165,22 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     }
 
     /**
+     * Register a parser
+     *
+     * @param descriptor The descriptor of the parser
+     * @param <T>        Generic type specifying what is produced by the parser
+     */
+    @Override
+    public <T> void parse(ParserDescriptor<CommandSender, T> descriptor) {
+        this.manager.parserRegistry().registerParser(descriptor);
+    }
+
+    /**
      * Register a parser supplier
      *
      * @param type     The type that is parsed by the parser
      * @param supplier The function that generates the parser. The map supplied may contain parameters used
-     *                 to configure the parser, many of which are documented in {@link StandardParameters}
+     *                 to configure the parser, many of which are documented in {@link org.incendo.cloud.parser.StandardParameters}
      * @param <T>      Generic type specifying what is produced by the parser
      */
     @Override
@@ -224,7 +196,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      *
      * @param type     The type that is parsed by the parser
      * @param supplier The function that generates the parser. The map supplied my contain parameters used
-     *                 to configure the parser, many of which are documented in {@link StandardParameters}
+     *                 to configure the parser, many of which are documented in {@link org.incendo.cloud.parser.StandardParameters}
      * @param <T>      Generic type specifying what is produced by the parser
      */
     @Override
@@ -240,7 +212,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      *
      * @param name     Parser name
      * @param supplier The function that generates the parser. The map supplied my contain parameters used
-     *                 to configure the parser, many of which are documented in {@link StandardParameters}
+     *                 to configure the parser, many of which are documented in {@link org.incendo.cloud.parser.StandardParameters}
      */
     @Override
     public void parse(
@@ -283,7 +255,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     @Override
     public void suggest(
             String name,
-            BiFunction<CommandContext<CommandSender>, String, List<String>> suggestionsProvider
+            BlockingSuggestionProvider.Strings<CommandSender> suggestionsProvider
     ) {
         manager.parserRegistry().registerSuggestionProvider(name, suggestionsProvider);
     }
@@ -374,8 +346,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     @Override
     public <A extends Annotation> void preprocessAnnotation(
             final Class<A> annotation,
-            final Function<A, BiFunction<CommandContext<CommandSender>, Queue<String>,
-                    ArgumentParseResult<Boolean>>> preprocessorMapper
+            final PreprocessorMapper<A, CommandSender> preprocessorMapper
     ) {
         this.annotationParser.registerPreprocessorMapper(annotation, preprocessorMapper);
     }
@@ -392,8 +363,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     @Override
     public <A extends Annotation> void preprocessAnnotation(
             final Class<A> annotation,
-            final BiFunction<CommandContext<CommandSender>, Queue<String>,
-                    ArgumentParseResult<Boolean>> preprocessorMapper
+            final ComponentPreprocessor<CommandSender> preprocessorMapper
     ) {
         preprocessAnnotation(annotation, a -> preprocessorMapper);
     }
@@ -408,8 +378,9 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public <T extends Throwable> void handle(Class<T> exceptionType, BiConsumer<CommandSender, T> handler) {
-        this.manager.registerExceptionHandler((Class) exceptionType, (BiConsumer) handler);
+    public <T extends Throwable> void handle(Class<T> exceptionType, ThrowingBiConsumer<CommandSender, T> handler) {
+        this.exceptionTypes.add(exceptionType);
+        this.manager.exceptionController().registerHandler(exceptionType, ctx -> handler.accept(ctx.context().sender(), ctx.exception()));
     }
 
     /**
@@ -425,7 +396,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     public <T extends Throwable> void handleMessage(Class<T> exceptionType, String message) {
         final Caption caption = Caption.of(message);
         handle(exceptionType, (sender, exception) -> {
-            String translated = manager.captionRegistry().getCaption(caption, sender);
+            String translated = manager.captionRegistry().caption(caption, sender);
             sender.sendMessage(Component.text(translated));
         });
     }
@@ -460,13 +431,10 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      * @param messageFactory Factory for producing the desired value for a caption
      */
     @Override
-    public void caption(String regex, BiFunction<Caption, CommandSender, String> messageFactory) {
-        if (manager.captionRegistry() instanceof SimpleCaptionRegistry) {
-            final Caption caption = Caption.of(regex);
-            ((SimpleCaptionRegistry<CommandSender>) manager.captionRegistry()).registerMessageFactory(
-                    caption, messageFactory
-            );
-        }
+    public void caption(String regex, Function<CommandSender, String> messageFactory) {
+        final Caption caption = Caption.of(regex);
+        final CaptionProvider<CommandSender> provider = CaptionProvider.forCaption(caption, messageFactory);
+        manager.captionRegistry().registerProvider(provider);
     }
 
     /**
@@ -477,7 +445,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
      */
     @Override
     public void caption(String regex, String value) {
-        caption(regex, (caption, sender) -> value);
+        caption(regex, sender -> value);
     }
 
     /**
@@ -495,14 +463,74 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
         return helpCommand(filterPrefix, helpDescription, builder -> builder);
     }
 
+    /**
+     * Registers a new help command for all the commands under a filter prefix
+     *
+     * @param filterPrefix Command filter prefix, for commands shown in the menu
+     * @param helpDescription Description of the help command
+     * @param modifier Modifier for the command applied before registering
+     * @return minecraft help command
+     */
     @Override
-    public Command<CommandSender> helpCommand(List<String> filterPrefix, String helpDescription, Function<Command.Builder<CommandSender>, Command.Builder<CommandSender>> modifier) {
-        return null;
+    public Command<CommandSender> helpCommand(
+            List<String> filterPrefix,
+            String helpDescription,
+            Function<Command.Builder<CommandSender>, Command.Builder<CommandSender>> modifier
+    ) {
+        String helpCmd = "/" + String.join(" ", filterPrefix) + " help";
+        final MinecraftHelp<CommandSender> help = this.help(helpCmd, filterPrefix);
+
+        // Start a builder
+        Command.Builder<CommandSender> command = Command.newBuilder(
+                filterPrefix.get(0),
+                CommandMeta.empty());
+        command = command.commandDescription(Description.of(helpDescription));
+
+        // Add literals, then 'help'
+        for (int i = 1; i < filterPrefix.size(); i++) {
+            command = command.literal(filterPrefix.get(i));
+        }
+        command = command.literal("help");
+        command = command.optional("query", StringParser.greedyStringParser());
+        command = command.handler(context -> {
+            String query = context.getOrDefault("query", "");
+            help.queryCommands(query, context.sender());
+        });
+        command = modifier.apply(command);
+
+        // Build & return
+        Command<CommandSender> builtCommand = command.build();
+        this.manager.command(builtCommand);
+        return builtCommand;
     }
 
+    /**
+     * Creates a help menu
+     *
+     * @param commandPrefix Help command prefix
+     * @param filterPrefix Command filter prefix, for commands shown in the menu
+     * @return minecraft help
+     */
     @Override
-    public MinecraftHelp<CommandSender> help(String commandPrefix, List<String> filterPrefix) {
-        return null;
-    }
+    public MinecraftHelp<CommandSender> help(String commandPrefix, final List<String> filterPrefix) {
+        MinecraftHelp<CommandSender> help = MinecraftHelp.<CommandSender>builder()
+                .commandManager(this.manager)
+                .audienceProvider((sender -> CTCommonsBukkit.adventure.sender(((BukkitCommandSender) sender).getSender())))
+                .commandPrefix(commandPrefix)
+                .commandFilter(command -> {
+                    List<CommandComponent<CommandSender>> args = command.components();
+                    if (args.size() < filterPrefix.size()) {
+                        return false;
+                    }
+                    for (int i = 0; i < filterPrefix.size(); i++) {
+                        if (!args.get(i).name().equals(filterPrefix.get(i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .build();
 
+        return help;
+    }
 }
