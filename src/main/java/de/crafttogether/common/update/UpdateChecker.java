@@ -1,6 +1,7 @@
 package de.crafttogether.common.update;
 
 import com.google.gson.*;
+import de.crafttogether.common.Logging;
 import de.crafttogether.common.configuration.Configuration;
 import de.crafttogether.common.configuration.file.FileConfiguration;
 import de.crafttogether.common.configuration.file.YamlConfiguration;
@@ -28,7 +29,7 @@ public class UpdateChecker {
          * @param installedVersion
          * @param installedBuild
          */
-        void operation(@Nullable Exception error, @Nullable Build build, String installedVersion, String installedBuild);
+        void operation(@Nullable Exception error, String installedVersion, String installedBuild, @Nullable Build build);
     }
 
     public static class UpdateFailedExeption extends Exception {
@@ -42,11 +43,30 @@ public class UpdateChecker {
     }
 
     /**
+     * @param projectName
+     * @param consumer
+     * @param checkForDevBuilds
+     */
+    public void checkUpdatesAsync(String projectName, Consumer consumer, boolean checkForDevBuilds) {
+        platform.getRunnableFactory().create(() -> checkUpdatesSync(projectName, consumer, checkForDevBuilds)).runTaskAsynchronously();
+    }
+
+    /**
      * @param consumer
      * @param checkForDevBuilds
      */
     public void checkUpdatesAsync(Consumer consumer, boolean checkForDevBuilds) {
         platform.getRunnableFactory().create(() -> checkUpdatesSync(consumer, checkForDevBuilds)).runTaskAsynchronously();
+    }
+
+    /**
+     * @param projectName
+     * @param consumer
+     * @param checkForDevBuilds
+     * @param delay
+     */
+    public void checkUpdatesAsync(String projectName, Consumer consumer, boolean checkForDevBuilds, long delay) {
+        platform.getRunnableFactory().create(() -> checkUpdatesSync(projectName, consumer, checkForDevBuilds)).runTaskLaterAsynchronously(delay);
     }
 
     /**
@@ -63,6 +83,14 @@ public class UpdateChecker {
      * @param checkForDevBuilds
      */
     public void checkUpdatesSync(Consumer consumer, boolean checkForDevBuilds) {
+        checkUpdatesSync(platform.getPluginInformation().getName(), consumer, checkForDevBuilds);
+    }
+    /**
+     * @param projectName
+     * @param consumer
+     * @param checkForDevBuilds
+     */
+    public void checkUpdatesSync(String projectName, Consumer consumer, boolean checkForDevBuilds) {
         Gson gson = new Gson();
         String json;
 
@@ -70,9 +98,9 @@ public class UpdateChecker {
         String installedBuild = platform.getPluginInformation().getBuild();
 
         try {
-            json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + platform.getPluginInformation().getName());
+            json = CommonUtil.readUrl("https://api.craft-together-mc.de/plugins/updates/?name=" + projectName);
         } catch (Exception e) {
-            consumer.operation(e, null, installedVersion, installedBuild);
+            consumer.operation(e, installedVersion, installedBuild, null);
             return;
         }
 
@@ -81,7 +109,7 @@ public class UpdateChecker {
 
             if (response != null && response.has("error")) {
                 Exception err = new UpdateFailedExeption(response.get("error").getAsString());
-                consumer.operation(err, null, installedVersion, installedBuild);
+                consumer.operation(err, installedVersion, installedBuild, null);
             }
             else if (response != null && response.has("builds")) {
                 JsonArray builds = response.getAsJsonArray("builds");
@@ -91,24 +119,24 @@ public class UpdateChecker {
 
                     int currentBuildNumber = 0, installedBuildNumber = 0;
                     try {
-                        currentBuildNumber = Integer.parseInt(build.getVersion());
+                        currentBuildNumber = build.getNumber();
                         installedBuildNumber = Integer.parseInt(installedBuild);
                     } catch (Exception ignored) {}
 
-                    if (checkForDevBuilds || build.getType().equals(BuildType.RELEASE) && currentBuildNumber > installedBuildNumber) {
-                        consumer.operation(null, build, installedVersion, installedBuild);
+                    if ((checkForDevBuilds || build.getType().equals(BuildType.RELEASE)) && currentBuildNumber > installedBuildNumber) {
+                        consumer.operation(null, installedVersion, installedBuild, build);
                         return;
                     }
                 }
 
-                consumer.operation(null, null, installedVersion, installedBuild);
+                consumer.operation(null, installedVersion, installedBuild, null);
             }
             else {
-                consumer.operation(null, null, installedVersion, installedBuild);
+                consumer.operation(null, installedVersion, installedBuild, null);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            consumer.operation(e, null, installedVersion, installedBuild);
+            consumer.operation(e, installedVersion, installedBuild, null);
         }
     }
 }

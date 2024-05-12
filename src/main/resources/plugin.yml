@@ -1,11 +1,11 @@
-name: CTCommons
+name: CTCommonsBukkit
 version: ${project.version}
 build: ${project.build.number}
+description: ${project.description}
+authors: [ J0schlZ ]
+website: ${project.url}
 main: de.crafttogether.ctcommons.CTCommonsBukkit
 api-version: 1.17
-authors: [ J0schlZ ]
-description: Library to centralize main functions for multiple plugins which will allow better maintaining capabilities and will lower general plugin sizes.
-website: https://github.com/CraftTogetherMC
 commands:
   ctcommons:
     description: Shows the current version of the plugin and informations about updates

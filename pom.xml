@@ -38,12 +38,23 @@
 
     <repositories>
         <repository>
+            <id>ctogethermc-repo</id>
+            <url>https://maven.craft-together-mc.de/</url>
+        </repository>
+
+        <repository>
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+
         <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+
+        <repository>
+            <id>MG-Dev Jenkins CI Maven Repository</id>
+            <url>https://ci.mg-dev.eu/plugin/repository/everything</url>
         </repository>
     </repositories>
 
@@ -98,7 +109,43 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Kyori -->
+        <!-- Cloud -->
+        <dependency>
+            <groupId>org.bergerhealer.cloud.commandframework</groupId>
+            <artifactId>cloud-paper</artifactId>
+            <version>1.8.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bergerhealer.cloud.commandframework</groupId>
+            <artifactId>cloud-bungee</artifactId>
+            <version>1.8.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bergerhealer.cloud.commandframework</groupId>
+            <artifactId>cloud-velocity</artifactId>
+            <version>1.8.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bergerhealer.cloud.commandframework</groupId>
+            <artifactId>cloud-annotations</artifactId>
+            <version>1.8.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bergerhealer.cloud.commandframework</groupId>
+            <artifactId>cloud-minecraft-extras</artifactId>
+            <version>1.8.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Adventure -->
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
@@ -117,26 +164,34 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bungeecord</artifactId>
             <version>4.3.2</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.16.0</version>
+            <version>4.17.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-legacy</artifactId>
-            <version>4.16.0</version>
+            <version>4.17.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
-            <version>4.12.0</version>
+            <version>4.17.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-gson</artifactId>
+            <version>4.17.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -251,24 +306,28 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
-                            <pattern>net.kyori</pattern>
-                            <shadedPattern>de.crafttogether.common.dep.net.kyori</shadedPattern>
+                            <pattern>cloud.commandframework</pattern>
+                            <shadedPattern>de.crafttogether.common.shaded.cloud</shadedPattern> <!-- Replace this -->
+                        </relocation>
+                        <relocation>
+                            <pattern>io.leangen.geantyref</pattern>
+                            <shadedPattern>de.crafttogether.common.shaded.typetoken</shadedPattern> <!-- Replace this -->
                         </relocation>
                         <relocation>
                             <pattern>de.exlll</pattern>
-                            <shadedPattern>de.crafttogether.common.dep.de.exlll</shadedPattern>
+                            <shadedPattern>de.crafttogether.common.shaded.de.exlll</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.bstats</pattern>
-                            <shadedPattern>de.crafttogether.common.dep.org.bstats</shadedPattern>
+                            <shadedPattern>de.crafttogether.common.shaded.org.bstats</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.mariadb.jdbc</pattern>
-                            <shadedPattern>de.crafttogether.common.dep.org.mariadb.jdbc</shadedPattern>
+                            <shadedPattern>de.crafttogether.common.shaded.org.mariadb.jdbc</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.yaml</pattern>
-                            <shadedPattern>de.crafttogether.common.dep.org.yaml</shadedPattern>
+                            <shadedPattern>de.crafttogether.common.shaded.org.yaml</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

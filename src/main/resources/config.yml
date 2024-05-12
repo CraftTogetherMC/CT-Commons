@@ -1,8 +1,17 @@
 Settings:
   Language: en_EN
-  Updates:
-    DisableNotifications: false
-    CheckForDevBuilds: true
-    Notify:
-      Console: true
-      InGame: true
+  Debug: false
+Updates:
+  DisableNotifications: false
+  CheckForDevBuilds: true
+  Notify:
+    Console: true
+    InGame: true
+Messaging:
+  Enabled: true
+  Server:
+    Port: 5000
+    BindAddress: 127.0.0.1
+    AcceptRemoteConnections: false
+    PublicAddress: 127.0.0.1
+    SecretKey: iliketrains

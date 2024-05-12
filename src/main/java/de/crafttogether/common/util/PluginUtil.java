@@ -46,8 +46,6 @@ public class PluginUtil {
         saveDefaultConfig(platform.getPluginInformation().getDataFolder(), platform.getPluginInformation().getResourceFromJar("config.yml"));
     }
 
-
-
     public static FileConfiguration getConfig(File dataFolder, String fileName) {
         File file = new File(dataFolder.getAbsolutePath() + File.separator + fileName);
         return YamlConfiguration.loadConfiguration(file);

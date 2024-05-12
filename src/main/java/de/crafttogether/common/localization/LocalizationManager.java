@@ -39,6 +39,14 @@ public class LocalizationManager {
         this.localeFolder = platform.getPluginInformation().getDataFolder() + File.separator + localeFolder;
         this.localeFile = this.localeFolder + File.separator + defaultLocale + ".yml";
 
+        addPlaceholder("pluginName", platform.getPluginInformation().getName());
+        addPlaceholder("installedVersion", platform.getPluginInformation().getVersion());
+        addPlaceholder("installedBuild", platform.getPluginInformation().getBuild());
+
+        this.placeholders.add(Placeholder.set("pluginName", platform.getPluginInformation().getName()));
+        this.placeholders.add(Placeholder.set("pluginVersion", platform.getPluginInformation().getVersion()));
+        this.placeholders.add(Placeholder.set("pluginBuild", platform.getPluginInformation().getBuild()));
+
         // Set up information header
         setHeader("Below are the localization nodes set for plugin '" + platform.getPluginInformation().getName() + "'.");
         addHeader("For colors and text-formatting use the MiniMessage format.");
