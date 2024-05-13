@@ -16,6 +16,7 @@ import de.crafttogether.common.update.BuildType;
 import de.crafttogether.common.update.UpdateChecker;
 import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.commands.ReloadCommand;
+import de.crafttogether.ctcommons.commands.UpdateCommand;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotations.string.PropertyReplacingStringProcessor;
 
@@ -33,7 +34,7 @@ public class CTCommons {
     private static CloudSimpleHandler cloud;
 
     public interface Consumer {
-        void operation(Component feedback);
+        void operation(Throwable err, Component feedback);
     }
 
     protected void onEnable(PlatformAbstractionLayer _platform) {
@@ -71,6 +72,7 @@ public class CTCommons {
 
         // Register commands
         cloud.annotations(new ReloadCommand());
+        cloud.annotations(new UpdateCommand());
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager(platform, Localization.class, "en_EN", "locales");
@@ -121,22 +123,26 @@ public class CTCommons {
                     || !config.getBoolean("Updates.Notify.InGame"))
                 return;
 
-            getUpdateFeedback((feedback) -> {
+            getUpdateFeedback((err, feedback) -> {
+                if (err != null)
+                    feedback = Component.text(err.getMessage());
+
+                Component finalFeedback = feedback;
                 switch (platform.getPlatformType()) {
                     case BUKKIT -> CTCommonsBukkit.adventure.player(uuid).sendMessage(feedback);
                     case BUNGEECORD -> CTCommonsBungee.adventure.player(uuid).sendMessage(feedback);
-                    case VELOCITY -> CTCommonsVelocity.proxy.getPlayer(uuid).ifPresent((player -> player.sendMessage(feedback)));
+                    case VELOCITY -> CTCommonsVelocity.proxy.getPlayer(uuid).ifPresent((player -> player.sendMessage(finalFeedback)));
                 }
-            });
+            }, 40L);
         }).runTask();
     }
 
-    public static void getUpdateFeedback(Consumer consumer) {
+    public static void getUpdateFeedback(Consumer consumer, Long delay) {
         new UpdateChecker(CTCommons.getPlatform()).checkUpdatesAsync("CTCommons", (err, installedVersion, installedBuild, build) -> {
             if (err != null) {
                 Logging.getLogger().warn("An error occurred while receiving update information.");
                 Logging.getLogger().warn("Error: " + err.getMessage());
-                consumer.operation(Component.text(err.getMessage()));
+                consumer.operation(err, Component.text(err.getMessage()));
             }
 
             if (build == null)
@@ -152,11 +158,11 @@ public class CTCommons {
             resolvers.add(Placeholder.set("url", build.getUrl()));
 
             if (build.getType().equals(BuildType.RELEASE))
-                consumer.operation(Localization.UPDATE_RELEASE.deserialize(resolvers));
+                consumer.operation(err, Localization.UPDATE_RELEASE.deserialize(resolvers));
             else
-                consumer.operation(Localization.UPDATE_DEVBUILD.deserialize(resolvers));
+                consumer.operation(err, Localization.UPDATE_DEVBUILD.deserialize(resolvers));
 
-        }, config.getBoolean("Updates.CheckForDevBuilds"), 40L);
+        }, config.getBoolean("Updates.CheckForDevBuilds"), delay);
     }
 
 

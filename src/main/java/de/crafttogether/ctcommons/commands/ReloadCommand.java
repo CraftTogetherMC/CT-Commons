@@ -8,10 +8,6 @@ import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
 
 public class ReloadCommand {
-
-    public ReloadCommand() {
-        Logging.getLogger().info("CMD: ReloadCommand loaded!");
-    }
     @Command("${plugin} reload")
     @CommandDescription("This command reloads the configuration of the plugin")
     public void ctcommons_reload(
