@@ -9,7 +9,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.plugin.VelocityPlatformLayer;
-import de.crafttogether.ctcommons.listener.PlayerChooseInitialServerListener;
+import de.crafttogether.common.platform.velocity.listener.PlayerChooseInitialServerListener;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -24,14 +24,14 @@ import java.nio.file.Path;
 )
 
 public class CTCommonsVelocity {
+    private PlatformAbstractionLayer platformLayer;
+
     public static CTCommonsVelocity plugin;
     public static PluginContainer pluginContainer;
     public static ProxyServer proxy;
-    public static PlatformAbstractionLayer platform;
-    private final CTCommons CTCommons = new CTCommons();
-
     private final Logger logger;
     private final Path dataDirectory;
+    private final CTCommonsCore CTCommonsInstance = new CTCommonsCore();
 
     @Inject
     public CTCommonsVelocity(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
@@ -44,12 +44,12 @@ public class CTCommonsVelocity {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         plugin = this;
         pluginContainer = proxy.getPluginManager().ensurePluginContainer(this);
-        platform = new VelocityPlatformLayer(plugin, proxy, logger, dataDirectory);
+        platformLayer = new VelocityPlatformLayer(plugin, proxy, logger, dataDirectory);
 
         // Register Listener
         proxy.getEventManager().register(this, new PlayerChooseInitialServerListener());
 
         // Startup
-        CTCommons.onEnable(platform);
+        CTCommonsInstance.onEnable(platformLayer);
     }
 }

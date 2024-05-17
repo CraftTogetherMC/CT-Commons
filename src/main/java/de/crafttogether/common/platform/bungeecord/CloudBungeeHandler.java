@@ -1,6 +1,6 @@
-package de.crafttogether.common.commands.platform.bungeecord;
+package de.crafttogether.common.platform.bungeecord;
 
-import de.crafttogether.common.Logging;
+import de.crafttogether.CTCommons;
 import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.common.commands.ThrowingBiConsumer;
@@ -75,7 +75,7 @@ public class CloudBungeeHandler implements CloudSimpleHandler {
      */
 
     public void enable(Plugin plugin) {
-        Logging.getLogger().info("Try to initialize cloud...");
+        CTCommons.getLogger().info("Try to initialize cloud...");
 
         try {
             this.manager = new BungeeCommandManager<>(
@@ -98,9 +98,6 @@ public class CloudBungeeHandler implements CloudSimpleHandler {
         handle(CommandExecutionException.class, this::handleException);
         handle(PipelineException.class, this::handleException);
         handle(InjectionException.class, this::handleException);
-
-
-        Logging.getLogger().info("DOne");
     }
 
     public void enable() {
@@ -507,7 +504,7 @@ public class CloudBungeeHandler implements CloudSimpleHandler {
     public MinecraftHelp<CommandSender> help(String commandPrefix, final List<String> filterPrefix) {
         MinecraftHelp<CommandSender> help = MinecraftHelp.<CommandSender>builder()
                 .commandManager(this.manager)
-                .audienceProvider((sender -> CTCommonsBungee.adventure.sender(((BungeeCommandSender) sender).getSender())))
+                .audienceProvider((sender -> CTCommons.BungeeCord.audiences.sender(((BungeeCommandSender) sender).getSender())))
                 .commandPrefix(commandPrefix)
                 .commandFilter(command -> {
                     List<CommandComponent<CommandSender>> args = command.components();

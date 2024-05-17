@@ -1,6 +1,6 @@
 package de.crafttogether.common.configuration.file;
 
-import de.crafttogether.common.Logging;
+import de.crafttogether.CTCommons;
 import de.crafttogether.common.configuration.Configuration;
 import de.crafttogether.common.configuration.ConfigurationSection;
 import de.crafttogether.common.configuration.InvalidConfigurationException;
@@ -178,7 +178,7 @@ public class YamlConfiguration extends FileConfiguration {
         try {
             config.load(file);
         } catch (IOException | InvalidConfigurationException ex) {
-            Logging.getLogger().warn("Cannot load " + file, ex);
+            CTCommons.getLogger().warn("Cannot load " + file, ex);
         }
 
         return config;
@@ -207,7 +207,7 @@ public class YamlConfiguration extends FileConfiguration {
         try {
             config.load(stream);
         } catch (IOException | InvalidConfigurationException ex) {
-            Logging.getLogger().warn("Cannot load configuration from stream", ex);
+            CTCommons.getLogger().warn("Cannot load configuration from stream", ex);
         }
 
         return config;
@@ -233,7 +233,7 @@ public class YamlConfiguration extends FileConfiguration {
         try {
             config.load(reader);
         } catch (IOException | InvalidConfigurationException ex) {
-            Logging.getLogger().warn("Cannot load configuration from stream", ex);
+            CTCommons.getLogger().warn("Cannot load configuration from stream", ex);
         }
 
         return config;

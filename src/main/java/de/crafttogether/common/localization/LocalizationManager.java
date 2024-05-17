@@ -1,9 +1,9 @@
 package de.crafttogether.common.localization;
 
-import de.crafttogether.common.Logging;
 import de.crafttogether.common.configuration.InvalidConfigurationException;
 import de.crafttogether.common.configuration.file.YamlConfiguration;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
+import de.crafttogether.common.plugin.server.PluginLogger;
 import de.crafttogether.common.util.CommonUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -18,6 +18,7 @@ import java.util.List;
 @SuppressWarnings({"unused", "deprecation"})
 public class LocalizationManager {
     private final PlatformAbstractionLayer platform;
+    private final PluginLogger logger;
 
     private final Class<? extends ILocalizationDefault> localization;
     private final String defaultLocale;
@@ -33,6 +34,8 @@ public class LocalizationManager {
 
     public LocalizationManager(PlatformAbstractionLayer platform, Class<? extends ILocalizationDefault> localization, String defaultLocale, String localeFolder) {
         this.platform = platform;
+        this.logger = platform.getPluginLogger();
+        
         this.localization = localization;
         this.defaultLocale = defaultLocale;
         this.localeKey = defaultLocale;
@@ -60,13 +63,13 @@ public class LocalizationManager {
 
         File folder = new File(this.localeFolder);
         if ((!folder.exists() || folder.isFile()) && folder.mkdir())
-            Logging.getLogger().info("Created folder: '" + this.localeFolder + "'");
+            logger.info("Created folder: '" + this.localeFolder + "'");
 
         if (!new File(this.localeFile).exists()) {
             this.localizationConfig.options().header(this.getHeaderString());
 
             if (!localeKey.equals(this.defaultLocale)) {
-                Logging.getLogger().warn("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
+                logger.warn("Could not find locale file: '" + this.localeFile + "' switching to default language. (" + this.defaultLocale + ")");
                 this.loadLocalization(this.defaultLocale);
                 return;
             }
@@ -83,25 +86,25 @@ public class LocalizationManager {
         try {
             this.localizationConfig.load(this.localeFile);
         } catch (IOException e) {
-            Logging.getLogger().warn("Failed reading locale file: '" + this.localeFile + "'", e);
-            Logging.getLogger().warn(e.getMessage(), e);
+            logger.warn("Failed reading locale file: '" + this.localeFile + "'", e);
+            logger.warn(e.getMessage(), e);
         } catch (InvalidConfigurationException e) {
-            Logging.getLogger().warn("Failed parsing locale file: '" + this.localeFile + "'", e);
-            Logging.getLogger().warn(e.getMessage(), e);
+            logger.warn("Failed parsing locale file: '" + this.localeFile + "'", e);
+            logger.warn(e.getMessage(), e);
         }
     }
 
     public void saveLocalization() {
         if (this.localizationConfig == null) {
-            Logging.getLogger().warn("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
+            logger.warn("Can't save locale file: '" + this.localeFile + "' because there is no localization loaded yet.");
             return;
         }
 
         try {
             this.localizationConfig.save(this.localeFile);
         } catch (IOException e) {
-            Logging.getLogger().warn("Failed saving locale file: '" + this.localeFile + "'", e);
-            Logging.getLogger().warn(e.getMessage());
+            logger.warn("Failed saving locale file: '" + this.localeFile + "'", e);
+            logger.warn(e.getMessage());
         }
     }
 

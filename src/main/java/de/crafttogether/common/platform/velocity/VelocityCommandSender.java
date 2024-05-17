@@ -1,33 +1,35 @@
-package de.crafttogether.common.commands.platform.bungeecord;
+package de.crafttogether.common.platform.velocity;
 
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.proxy.Player;
 import de.crafttogether.common.commands.AbstractCommandSender;
-import de.crafttogether.ctcommons.CTCommonsBungee;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-public class BungeeCommandSender extends AbstractCommandSender<CommandSender> {
+public class VelocityCommandSender extends AbstractCommandSender<CommandSource> {
     private final Audience audience;
-    private final CommandSender sender;
+    private final CommandSource sender;
 
-    public BungeeCommandSender(CommandSender sender) {
+    public VelocityCommandSender(CommandSource sender) {
         super(sender);
         this.sender = sender;
-        this.audience = CTCommonsBungee.adventure.sender(sender);
+        this.audience = Audience.audience(sender);
     }
 
     @Override
     public String getName() {
-        return this.delegate.getName();
+        if (super.delegate instanceof Player) {
+            return ((Player) super.delegate).getUsername();
+        }
+        return null;
     }
 
     @Override
     public UUID getUniqueId() {
-        if (super.delegate instanceof ProxiedPlayer) {
-            return ((ProxiedPlayer) super.delegate).getUniqueId();
+        if (super.delegate instanceof Player) {
+            return ((Player) super.delegate).getUniqueId();
         }
         return null;
     }
@@ -42,7 +44,7 @@ public class BungeeCommandSender extends AbstractCommandSender<CommandSender> {
         return super.delegate.hasPermission(permission);
     }
 
-    public CommandSender getSender() {
+    public CommandSource getSender() {
         return sender;
     }
 }

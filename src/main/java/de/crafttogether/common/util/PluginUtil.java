@@ -1,10 +1,9 @@
 package de.crafttogether.common.util;
 
-import de.crafttogether.common.Logging;
+import de.crafttogether.CTCommons;
 import de.crafttogether.common.configuration.file.FileConfiguration;
 import de.crafttogether.common.configuration.file.YamlConfiguration;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
-import de.crafttogether.common.plugin.PluginInformation;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,7 +26,7 @@ public class PluginUtil {
                 in.transferTo(outputStream);
             }
             catch (IOException e) {
-                Logging.getLogger().warn("Failed saving configuration file: '" + fileName + "'", e);
+                CTCommons.getLogger().warn("Failed saving configuration file: '" + fileName + "'", e);
             }
         }
     }

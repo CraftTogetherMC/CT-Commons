@@ -1,29 +1,25 @@
-package de.crafttogether.common.commands.platform.velocity;
+package de.crafttogether.common.platform.bukkit;
 
-import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
 import de.crafttogether.common.commands.AbstractCommandSender;
+import de.crafttogether.ctcommons.CTCommonsBukkit;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class VelocityCommandSender extends AbstractCommandSender<CommandSource> {
+public class BukkitCommandSender extends AbstractCommandSender<CommandSender> {
     private final Audience audience;
-    private final CommandSource sender;
 
-    public VelocityCommandSender(CommandSource sender) {
+    public BukkitCommandSender(CommandSender sender) {
         super(sender);
-        this.sender = sender;
-        this.audience = Audience.audience(sender);
+        this.audience = CTCommonsBukkit.audiences.sender(sender);
     }
 
     @Override
     public String getName() {
-        if (super.delegate instanceof Player) {
-            return ((Player) super.delegate).getUsername();
-        }
-        return null;
+        return this.delegate.getName();
     }
 
     @Override
@@ -44,7 +40,7 @@ public class VelocityCommandSender extends AbstractCommandSender<CommandSource> 
         return super.delegate.hasPermission(permission);
     }
 
-    public CommandSource getSender() {
-        return sender;
+    public CommandSender getSender() {
+        return super.delegate;
     }
 }

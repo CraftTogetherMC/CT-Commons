@@ -1,25 +1,23 @@
-package de.crafttogether.common.commands.platform.velocity;
+package de.crafttogether.common.platform.bukkit;
 
-import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.plugin.PluginContainer;
-import com.velocitypowered.api.proxy.ProxyServer;
+import de.crafttogether.CTCommons;
 import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.common.commands.ThrowingBiConsumer;
 import de.crafttogether.common.localization.LocalizationEnum;
 import de.crafttogether.common.util.CommonUtil;
-import de.crafttogether.ctcommons.CTCommonsBungee;
-import de.crafttogether.ctcommons.CTCommonsVelocity;
+import de.crafttogether.ctcommons.CTCommonsBukkit;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.audience.Audiences;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.Component;
+import org.bukkit.plugin.Plugin;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.annotations.PreprocessorMapper;
-import org.incendo.cloud.bungee.BungeeCommandManager;
+import org.incendo.cloud.brigadier.CloudBrigadierManager;
+import org.incendo.cloud.bukkit.BukkitCommandManager;
+import org.incendo.cloud.bukkit.BukkitCommandManager.BrigadierInitializationException;
 import org.incendo.cloud.caption.Caption;
 import org.incendo.cloud.caption.CaptionProvider;
 import org.incendo.cloud.component.CommandComponent;
@@ -32,6 +30,7 @@ import org.incendo.cloud.execution.postprocessor.CommandPostprocessor;
 import org.incendo.cloud.injection.ParameterInjector;
 import org.incendo.cloud.meta.CommandMeta;
 import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.paper.PaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.parser.ParserParameter;
@@ -39,7 +38,6 @@ import org.incendo.cloud.parser.ParserParameters;
 import org.incendo.cloud.parser.standard.StringParser;
 import org.incendo.cloud.services.PipelineException;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
-import org.incendo.cloud.velocity.VelocityCommandManager;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -47,20 +45,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 /**
- * Configures the Cloud Command Framework for basic use inside a Velocity
- * server environment. Initializes the command manager itself as synchronously
+ * Configures the Cloud Command Framework for basic use inside a Bukkit Paper or
+ * Spigot server environment. Initializes the command manager itself as synchronously
  * executing (on main thread), registers annotations and help system, and also
  * registers some useful preprocessing logic.
  *
  * From annotation-registered commands you can obtain your plugin instance easily,
  * as it is made available through an injector by default.
  */
-public class CloudVelocityHandler implements CloudSimpleHandler {
-    private VelocityCommandManager<CommandSender> manager;
+public class CloudBukkitHandler implements CloudSimpleHandler {
+    private BukkitCommandManager<CommandSender> manager;
     private AnnotationParser<CommandSender> annotationParser;
-
     private final Set<Class<?>> exceptionTypes = new HashSet<>();
 
     /**
@@ -77,21 +75,29 @@ public class CloudVelocityHandler implements CloudSimpleHandler {
      * Enables and initializes the Cloud Command Framework. After this is
      * called, commands and other things can be registered.
      *
-     * @param plugin Owning Bungeecord Plugin for this handler
+     * @param plugin Owning Bukkit Plugin for this handler
      */
     @SuppressWarnings("unchecked")
-    public void enable(PluginContainer plugin, ProxyServer proxy) {
+    public void enable(Plugin plugin) {
         try {
-            this.manager = new VelocityCommandManager<>(
+            this.manager = new PaperCommandManager<>(
                     /* Owning plugin */ plugin,
-                    /* Proxy server */ proxy,
                     /* Coordinator function */ ExecutionCoordinator.simpleCoordinator(),
-                    /* Command Sender <-> C */ SenderMapper.create(this::getCommandSender, (sender) -> ((VelocityCommandSender) sender).getSender())
+                    /* Command Sender <-> C */ SenderMapper.create(this::getCommandSender, (sender) -> ((BukkitCommandSender) sender).getSender())
             );
         } catch (final Exception e) {
             throw new IllegalStateException("Failed to initialize the command manager", e);
         }
 
+        try {
+            manager.registerBrigadier();
+            CloudBrigadierManager<?, ?> brig = manager.brigadierManager();
+
+            brig.setNativeNumberSuggestions(false);
+        } catch (BrigadierInitializationException ex) {
+            plugin.getLogger().log(Level.WARNING, "Failed to register commands using brigadier, " +
+                    "using fallback instead. Error:", ex);
+        }
 
         // Create the annotation parser. This allows you to define commands using methods annotated with @Command
         this.annotationParser = new AnnotationParser<>(
@@ -110,11 +116,11 @@ public class CloudVelocityHandler implements CloudSimpleHandler {
         if (isEnabled())
             return;
 
-        enable(CTCommonsVelocity.pluginContainer, CTCommonsVelocity.proxy);
+        enable(CTCommonsBukkit.plugin);
     }
 
-    private CommandSender getCommandSender(CommandSource commandSource) {
-        return new VelocityCommandSender(commandSource);
+    public CommandSender getCommandSender(org.bukkit.command.CommandSender bukkitCommandSender) {
+        return new BukkitCommandSender(bukkitCommandSender);
     }
 
     @Override
@@ -510,7 +516,7 @@ public class CloudVelocityHandler implements CloudSimpleHandler {
     public MinecraftHelp<CommandSender> help(String commandPrefix, final List<String> filterPrefix) {
         MinecraftHelp<CommandSender> help = MinecraftHelp.<CommandSender>builder()
                 .commandManager(this.manager)
-                .audienceProvider((sender -> ((VelocityCommandSender) sender).getSender()))
+                .audienceProvider((sender -> CTCommons.Bukkit.audiences.sender(((BukkitCommandSender) sender).getSender())))
                 .commandPrefix(commandPrefix)
                 .commandFilter(command -> {
                     List<CommandComponent<CommandSender>> args = command.components();

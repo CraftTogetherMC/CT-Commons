@@ -1,8 +1,8 @@
 package de.crafttogether.ctcommons;
 
+import de.crafttogether.common.platform.bukkit.events.PlayerJoinListener;
 import de.crafttogether.common.plugin.BukkitPlatformLayer;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
-import de.crafttogether.ctcommons.listener.PlayerJoinListener;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;
@@ -10,17 +10,18 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CTCommonsBukkit extends JavaPlugin implements CommandExecutor, TabExecutor {
-    public static CTCommonsBukkit plugin;
-    public static PlatformAbstractionLayer platform;
-    public static BukkitAudiences adventure;
+    private PlatformAbstractionLayer platformLayer;
 
-    private final CTCommons CTCommonsInstance = new CTCommons();
+    public static CTCommonsBukkit plugin;
+    public static BukkitAudiences audiences;
+
+    private final CTCommonsCore CTCommonsInstance = new CTCommonsCore();
 
     @Override
     public void onEnable() {
         plugin = this;
-        adventure = BukkitAudiences.create(plugin);
-        platform = new BukkitPlatformLayer(plugin);
+        audiences = BukkitAudiences.create(plugin);
+        platformLayer = new BukkitPlatformLayer(plugin);
 
         // bStats
         new Metrics(plugin, 17413);
@@ -29,11 +30,11 @@ public final class CTCommonsBukkit extends JavaPlugin implements CommandExecutor
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
 
         // Startup
-        CTCommonsInstance.onEnable(platform);
+        CTCommonsInstance.onEnable(platformLayer);
     }
 
     @Override
     public void onDisable() {
-        CTCommonsInstance.onDisable(platform);
+        CTCommonsInstance.onDisable(platformLayer);
     }
 }

@@ -1,16 +1,12 @@
 package de.crafttogether.common.update;
 
-import com.google.gson.*;
-import de.crafttogether.common.Logging;
-import de.crafttogether.common.configuration.Configuration;
-import de.crafttogether.common.configuration.file.FileConfiguration;
-import de.crafttogether.common.configuration.file.YamlConfiguration;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.util.CommonUtil;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.InputStreamReader;
 
 /**
  * Retrieve update information from api.craft-together.de

@@ -1,8 +1,7 @@
 package de.crafttogether.ctcommons.commands;
 
-import de.crafttogether.common.Logging;
+import de.crafttogether.CTCommons;
 import de.crafttogether.common.commands.CommandSender;
-import de.crafttogether.ctcommons.CTCommons;
 import de.crafttogether.ctcommons.Localization;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
@@ -13,13 +12,13 @@ public class ReloadCommand {
     public void ctcommons_reload(
             final CommandSender sender
     ) {
-        Logging.getLogger().info("Reloading config.yml...");
-        CTCommons.reloadConfig();
+        CTCommons.getLogger().info("Reloading config.yml...");
+        CTCommons.plugin.reloadConfig();
 
-        Logging.getLogger().info("Reloading localization...");
-        CTCommons.getLocalizationManager().loadLocalization(CTCommons.getConfig().getString("Settings.Language"));
+        CTCommons.getLogger().info("Reloading localization...");
+        CTCommons.plugin.getLocalizationManager().loadLocalization(CTCommons.plugin.getConfig().getString("Settings.Language"));
 
-        Logging.getLogger().info("Reload completed...");
+        CTCommons.getLogger().info("Reload completed...");
 
         sender.sendMessage(Localization.CONFIG_RELOADED.deserialize());
     }

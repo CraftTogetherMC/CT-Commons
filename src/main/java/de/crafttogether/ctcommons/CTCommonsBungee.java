@@ -2,24 +2,25 @@ package de.crafttogether.ctcommons;
 
 import de.crafttogether.common.plugin.BungeePlatformLayer;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
-import de.crafttogether.ctcommons.listener.PostLoginListener;
+import de.crafttogether.common.platform.bungeecord.listener.PostLoginListener;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bstats.bungeecord.Metrics;
 
 public final class CTCommonsBungee extends Plugin {
-    public static CTCommonsBungee plugin;
-    public static PlatformAbstractionLayer platform;
-    public static BungeeAudiences adventure;
+    private PlatformAbstractionLayer platformLayer;
 
-    private final CTCommons CTCommons = new CTCommons();
+    public static CTCommonsBungee plugin;
+    public static BungeeAudiences audiences;
+
+    private final CTCommonsCore CTCommonsInstance = new CTCommonsCore();
 
     @Override
     public void onEnable() {
         plugin = this;
-        adventure = BungeeAudiences.create(plugin);
-        platform = new BungeePlatformLayer(plugin);
+        audiences = BungeeAudiences.create(plugin);
+        platformLayer = new BungeePlatformLayer(plugin);
 
         // bStats
         new Metrics(plugin, 17413);
@@ -28,11 +29,11 @@ public final class CTCommonsBungee extends Plugin {
         ProxyServer.getInstance().getPluginManager().registerListener(plugin, new PostLoginListener());
 
         // Startup
-        CTCommons.onEnable(platform);
+        CTCommonsInstance.onEnable(platformLayer);
     }
 
     @Override
     public void onDisable() {
-        CTCommons.onDisable(platform);
+        CTCommonsInstance.onDisable(platformLayer);
     }
 }
