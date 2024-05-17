@@ -5,6 +5,8 @@ import de.crafttogether.CTCommons;
 import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.configuration.file.FileConfiguration;
 import de.crafttogether.common.localization.LocalizationManager;
+import de.crafttogether.common.messaging.MessagingServer;
+import de.crafttogether.common.messaging.MessagingService;
 import de.crafttogether.common.mysql.LogFilter;
 import de.crafttogether.common.platform.bukkit.CloudBukkitHandler;
 import de.crafttogether.common.platform.bungeecord.CloudBungeeHandler;
@@ -74,6 +76,10 @@ public class CTCommonsCore {
         localizationManager.loadLocalization(config.getString("Settings.Language"));
         localizationManager.addTagResolver("prefix", Localization.PREFIX.deserialize());
 
+        // Start MessagingService
+        if (getConfig().getBoolean("Messaging.Enabled"))
+            MessagingService.enable();
+
         // Check for updates
         if (!config.getBoolean("Updates.Notify.DisableNotifications") && config.getBoolean("Updates.Notify.Console"))
             UpdateCommand.getUpdateFeedback((err, feedback) -> AdventureUtil.getConsole().sendMessage(
@@ -87,6 +93,9 @@ public class CTCommonsCore {
     }
 
     protected void onDisable(PlatformAbstractionLayer platform) {
+        if (MessagingService.isEnabled())
+            MessagingService.disable();
+
         PluginInformation pluginInformation = platform.getPluginInformation();
         platform.getPluginLogger().info(pluginInformation.getName() + " v" + platform.getPluginInformation().getVersion() + " disabled.");
     }

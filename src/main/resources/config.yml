@@ -9,9 +9,8 @@ Updates:
     InGame: true
 Messaging:
   Enabled: true
-  Server:
+  ServerName: lobby
+  Connection:
+    Host: 127.0.0.1
     Port: 5000
-    BindAddress: 127.0.0.1
-    AcceptRemoteConnections: false
-    PublicAddress: 127.0.0.1
     SecretKey: iliketrains

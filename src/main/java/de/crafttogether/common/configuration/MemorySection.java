@@ -1,7 +1,5 @@
 package de.crafttogether.common.configuration;
 
-import static org.bukkit.util.NumberConversions.*;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.Validate;
+
+import static de.crafttogether.common.util.NumberConversions.*;
 
 /**
  * A type of {@link ConfigurationSection} that is stored in memory.

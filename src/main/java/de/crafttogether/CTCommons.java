@@ -6,17 +6,21 @@ import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.plugin.PluginInformation;
 import de.crafttogether.common.plugin.scheduling.RunnableFactory;
 import de.crafttogether.common.plugin.server.PluginLogger;
+import de.crafttogether.common.util.AdventureUtil;
 import de.crafttogether.ctcommons.CTCommonsBukkit;
 import de.crafttogether.ctcommons.CTCommonsBungee;
 import de.crafttogether.ctcommons.CTCommonsCore;
 import de.crafttogether.ctcommons.CTCommonsVelocity;
+import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.kyori.adventure.text.Component;
 
 public class CTCommons {
     public static CTCommonsCore plugin = CTCommonsCore.instance;
     private static final EventManager eventManager = new EventManager();
 
+    public static boolean isProxy() { return !plugin.getPlatform().isBukkit(); }
     public static boolean isBukkit() {
         return plugin.getPlatform().isBukkit();
     }
@@ -59,4 +63,15 @@ public class CTCommons {
     public static EventManager getEventManager() {
         return eventManager;
     }
+
+    public static void debug(String message, boolean broadcast) {
+        getLogger().info("[DEBUG]: " + message);
+        if (broadcast)
+            AdventureUtil.getPlayers().sendMessage(Component.text("[DEBUG]: ").append(Component.text(message)));
+    }
+
+    public static void debug(String message) {
+        debug(message, false);
+    }
+
 }
