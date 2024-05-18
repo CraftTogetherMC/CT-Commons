@@ -5,22 +5,22 @@ import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
 import de.crafttogether.common.messaging.events.PacketReceivedEvent;
 import de.crafttogether.common.messaging.packets.*;
-import de.crafttogether.ctcommons.CTCommonsCore;
 
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class MessagingClient {
     private static MessagingClient instance;
-
     private static String host;
     private static int port;
     private static String secretKey;
     private static String serverName;
     private static ClientConnection clientConnection;
-    private static final Collection<ClientConnection> activeClients = new ArrayList<>();
+    private static final List<ClientConnection> activeClients = new ArrayList<>();
+    private static final List<String> serverList = new ArrayList<>();
 
     private int reconnectAttempts;
 
@@ -80,6 +80,10 @@ public class MessagingClient {
         }).runTaskLaterAsynchronously(wait);
     }
 
+    public List<String> getServerList() {
+        return serverList;
+    }
+
     public ClientConnection getClientConnection() {
         return clientConnection;
     }
@@ -101,14 +105,24 @@ public class MessagingClient {
         @Override
         public void onPacketReceived(Packet abstractPacket) {
             if (abstractPacket instanceof ErrorPacket packet) {
-                Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());
                 CTCommons.debug("[MessagingClient]: Error: " + packet.getError().name());
+                Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
 
             else if (abstractPacket instanceof AuthenticationSuccessPacket packet) {
-                CTCommons.debug("[MessagingClient]: Client sucessfully authenticated!", false);
+                CTCommons.debug("[MessagingClient]: Client sucessfully authenticated! " + packet.getServerList(), false);
+                serverList.clear();
+                serverList.addAll(packet.getServerList());
                 isAuthenticated(true);
+            }
+
+            else if (abstractPacket instanceof ServerConnectedPacket packet) {
+                serverList.add(packet.getServerName());
+            }
+
+            else if (abstractPacket instanceof ServerDisconnectedPacket packet) {
+                serverList.remove(packet.getServerName());
             }
 
             else {

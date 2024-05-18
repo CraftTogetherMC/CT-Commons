@@ -67,15 +67,19 @@ public class MessagingService {
         if (!isEnabled())
             return; // TODO: Not enabled exception?
 
-        if (CTCommons.isProxy()) {
+        if (CTCommons.isProxy())
             messagingServer.send(
                     packet.setSender("proxy"));
-        }
-
-        else {
+        else
             messagingClient.getClientConnection().send(
                     packet.setSender(messagingClient.getClientConnection().getClientName()));
-        }
+    }
+
+    public static List<String> getConnectedServers() {
+        if (CTCommons.isProxy())
+            return messagingServer.getServerList();
+        else
+            return messagingClient.getServerList();
     }
 
     public static void disable() {

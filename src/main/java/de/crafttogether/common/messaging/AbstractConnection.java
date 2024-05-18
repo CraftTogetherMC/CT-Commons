@@ -108,8 +108,6 @@ public abstract class AbstractConnection extends Thread {
             return false;
         }
 
-        CTCommons.getLogger().warn("[MessagingClient]: Sent #" + packet.getClass().getSimpleName() + " to " + packet.getRecipients() + " from " + packet.getSender());
-
         return true;
     }
 

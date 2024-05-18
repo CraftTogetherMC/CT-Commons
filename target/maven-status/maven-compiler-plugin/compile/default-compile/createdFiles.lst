@@ -6,6 +6,7 @@ de\crafttogether\common\commands\ThrowingBiConsumer.class
 de\crafttogether\common\messaging\MessagingClient.class
 velocity-plugin.json
 de\crafttogether\common\configuration\file\FileConfigurationOptions.class
+de\crafttogether\ctcommons\commands\MessagingCommands.class
 de\crafttogether\common\localization\LocalizationManager.class
 de\crafttogether\common\commands\CloudLocalizedException.class
 de\crafttogether\common\commands\CloudSimpleHandler.class

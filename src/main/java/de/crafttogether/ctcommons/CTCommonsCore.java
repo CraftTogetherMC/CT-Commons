@@ -16,6 +16,7 @@ import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.plugin.PluginInformation;
 import de.crafttogether.common.util.AdventureUtil;
 import de.crafttogether.common.util.PluginUtil;
+import de.crafttogether.ctcommons.commands.MessagingCommands;
 import de.crafttogether.ctcommons.commands.ReloadCommand;
 import de.crafttogether.ctcommons.commands.UpdateCommand;
 import de.crafttogether.ctcommons.listener.PlayerJoinListener;
@@ -68,6 +69,7 @@ public class CTCommonsCore {
         // Register commands
         cloud.annotations(new ReloadCommand());
         cloud.annotations(new UpdateCommand());
+        cloud.annotations(new MessagingCommands());
 
         // Register listener
         CTCommons.getEventManager().registerListener(platformLayer, new PlayerJoinListener());

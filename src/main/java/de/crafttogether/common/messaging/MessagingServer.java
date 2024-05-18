@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import static de.crafttogether.common.messaging.ConnectionState.NO_REMOTE_CONNECTIONS;
 
 public class MessagingServer extends Thread {
+    private static MessagingServer instance;
     private static String host;
     private static int port;
     private static String secretKey;
@@ -25,7 +26,9 @@ public class MessagingServer extends Thread {
     private ServerSocket serverSocket;
 
     protected MessagingServer(String host, int port, String secretKey, boolean acceptRemoteConnections) {
+        instance = this;
         this.setName(CTCommons.getPluginInformation().getName() + " network thread");
+
         MessagingServer.host = host;
         MessagingServer.port = port;
         MessagingServer.secretKey = secretKey;
@@ -83,8 +86,6 @@ public class MessagingServer extends Thread {
     }
 
     public void send(Packet packet) {
-        CTCommons.debug("CALL SEND");
-
         // Broadcast
         if (packet.getBroadcast()) {
             packet.setRecipients(new ArrayList<>());
@@ -92,9 +93,13 @@ public class MessagingServer extends Thread {
             for (ClientConnection clientConnection : getRegisteredClients())
                 packet.addRecipient(clientConnection.getClientName());
 
-            for (ClientConnection clientConnection : getRegisteredClients()) {
-                if (clientConnection.getClientName().equals(packet.getSender())) continue;
-                clientConnection.send(packet);
+            if (!packet.getRecipients().isEmpty()) {
+                for (ClientConnection clientConnection : getRegisteredClients()) {
+                    if (clientConnection.getClientName().equals(packet.getSender())) continue;
+                    clientConnection.send(packet);
+                }
+
+                CTCommons.getLogger().warn("[MessagingClient]: Sent #" + packet.getClass().getSimpleName() + " to " + packet.getRecipients() + " from " + packet.getSender());
             }
         }
 
@@ -110,22 +115,31 @@ public class MessagingServer extends Thread {
 
             for (String recipient : packet.getRecipients())
                 getClient(recipient).send(packet);
+
+            CTCommons.getLogger().warn("[MessagingClient]: Sent #" + packet.getClass().getSimpleName() + " to " + packet.getRecipients() + " from " + packet.getSender());
         }
     }
 
-    public static ClientConnection getClient(String clientName) {
+    public ClientConnection getClient(String clientName) {
         return clientsList.stream().filter(clientConnection -> clientConnection.getClientName().equals(clientName)).findAny().orElse(null);
     }
 
-    public static ArrayList<ClientConnection> getClients() {
+    public ArrayList<ClientConnection> getClients() {
         return clientsList;
     }
 
-    public static List<ClientConnection> getRegisteredClients() {
-        CTCommons.debug("Client-List: " + clientsList.size());
+    public List<ClientConnection> getRegisteredClients() {
         List<ClientConnection> registered = clientsList.stream().filter(clientConnection -> clientConnection.isAuthenticated()).collect(Collectors.toList());
-        CTCommons.debug("Client-List: " + registered.size());
         return registered;
+    }
+
+    public List<String> getServerList() {
+        List<String> serverNames = new ArrayList<>();
+        for (ClientConnection connection : clientsList) {
+            if (connection.isAuthenticated())
+                serverNames.add(connection.getClientName());
+        }
+        return serverNames;
     }
 
     public void close() {
@@ -168,15 +182,12 @@ public class MessagingServer extends Thread {
                     setClientName(packet.getClientName());
 
                     // Announce new connected server to other connections
-                    for (ClientConnection clientConnection : clientsList) {
-                        if (!clientConnection.isAuthenticated()) continue;
-                        send(new ServerConnectedPacket(packet.getClientName())
-                                .setBroadcast(true)
-                                .setSender("proxy"));
-                    }
+                    instance.send(new ServerConnectedPacket(packet.getClientName())
+                            .setBroadcast(true)
+                            .setSender("proxy"));
 
                     isAuthenticated(true);
-                    send(new AuthenticationSuccessPacket()
+                    send(new AuthenticationSuccessPacket(instance.getServerList())
                             .addRecipient(getClientName())
                             .setSender("proxy"));
 
@@ -203,7 +214,7 @@ public class MessagingServer extends Thread {
             // Announce disconnected server to other connections
             for (ClientConnection clientConnection : clientsList) {
                 if (!clientConnection.isAuthenticated()) continue;
-                send(new ServerDisconnectedPacket(getClientName())
+                instance.send(new ServerDisconnectedPacket(getClientName())
                         .setBroadcast(true)
                         .setSender("proxy"));
             }
