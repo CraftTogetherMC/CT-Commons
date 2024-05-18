@@ -5,6 +5,7 @@ import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
 import de.crafttogether.common.messaging.events.PacketReceivedEvent;
 import de.crafttogether.common.messaging.packets.AuthenticationPacket;
+import de.crafttogether.common.messaging.packets.AuthenticationSuccess;
 import de.crafttogether.common.messaging.packets.MessagePacket;
 import de.crafttogether.common.messaging.packets.Packet;
 
@@ -61,7 +62,7 @@ public class MessagingServer extends Thread {
                     continue;
 
                 ClientConnection client = new ClientConnection(connection);
-                CTCommons.debug("[MessagingServer]: " + Arrays.toString(connection.getInetAddress().getAddress()) + " connected.", false);
+                CTCommons.debug("[MessagingServer]: " + connection.getInetAddress().getHostAddress() + " connected.", false);
 
                 // Should we accept remote connections?
                 if (!acceptRemoteConnections && !client.getAddress().equals("127.0.0.1"))
@@ -102,15 +103,22 @@ public class MessagingServer extends Thread {
     protected static class ClientConnection extends AbstractConnection {
         protected ClientConnection(Socket connection) {
             super(connection);
+
+            CTCommons.getRunnableFactory().create(() -> {
+                if (!isAuthenticated())
+                    kick(Error.NOT_AUTHENTICATED);
+            }).runTaskLaterAsynchronously(80L);
         }
 
         @Override
         public void onPacketReceived(Packet abstractPacket) {
             // First packet has to be an AuthenticationPacket
             if (!isAuthenticated() && abstractPacket instanceof AuthenticationPacket packet) {
-                if (packet.key().equals(secretKey)) {
-                    setClientName(packet.sender());
+                if (packet.clientName() != null && packet.key() != null && packet.key().equals(secretKey)) {
+                    setClientName(packet.clientName());
                     isAuthenticated(true);
+
+                    send(new AuthenticationSuccess());
                     CTCommons.debug("[MessagingClient]: Client (" + getClientName() + ") sucessfully authenticated.", false);
                 }
                 else

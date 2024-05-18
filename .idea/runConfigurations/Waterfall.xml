@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Waterfall" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/../../Testserver/Waterfall/waterfall.jar" />
+    <option name="VM_PARAMETERS" value="-Xms512M -Xmx512M" />
+    <option name="WORKING_DIRECTORY" value="C:\Users\ASUS\OneDrive\Entwicklung\Testserver\Waterfall" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2" />
+  </configuration>
+</component>

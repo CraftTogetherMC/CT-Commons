@@ -15,6 +15,7 @@ public class MessagingService {
         if (enabled)
             return;
 
+        String serverName;
         String host;
         int port;
         String secretKey;
@@ -31,7 +32,8 @@ public class MessagingService {
             host = CTCommons.plugin.getConfig().getString("Messaging.Connection.Host");
             port = CTCommons.plugin.getConfig().getInt("Messaging.Connection.Port");
             secretKey = CTCommons.plugin.getConfig().getString("Messaging.Connection.SecretKey");
-            messagingClient = new MessagingClient(host, port, secretKey);
+            serverName = CTCommons.plugin.getConfig().getString("Messaging.ServerName");
+            messagingClient = new MessagingClient(host, port, secretKey, serverName);
         }
 
         enabled = true;

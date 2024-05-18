@@ -1,0 +1,1 @@
+{"id":"ctcommons","name":"CTCommonsVelocity","version":"1.0-BETA3","description":"Library to centralize main functions for multiple plugins which will allow better maintaining capabilities and will lower general plugin sizes.","url":"https://github.com/CraftTogetherMC","authors":["J0schlZ"],"dependencies":[],"main":"de.crafttogether.ctcommons.CTCommonsVelocity"}

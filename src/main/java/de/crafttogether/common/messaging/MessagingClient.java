@@ -5,6 +5,7 @@ import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
 import de.crafttogether.common.messaging.events.PacketReceivedEvent;
 import de.crafttogether.common.messaging.packets.AuthenticationPacket;
+import de.crafttogether.common.messaging.packets.AuthenticationSuccess;
 import de.crafttogether.common.messaging.packets.MessagePacket;
 import de.crafttogether.common.messaging.packets.Packet;
 
@@ -64,14 +65,10 @@ public class MessagingClient extends Thread {
             super(connection);
         }
 
-        public void sendAuth(String secretKey) {
-            AuthenticationPacket packet = new AuthenticationPacket(serverName, secretKey);
-            send(packet);
-        }
-
         @Override
         public void onConnection() {
-            CTCommons.debug("[MessagingClient]: Client sucessfully connected!", false);
+            CTCommons.debug("[MessagingClient]: Client connected!", false);
+            send(new AuthenticationPacket(serverName, secretKey));
         }
 
         @Override
@@ -88,6 +85,11 @@ public class MessagingClient extends Thread {
                 }
                 else
                     CTCommons.debug("[MessagingClient]: Received Message: " + packet.message());
+            }
+
+            else if (abstractPacket instanceof AuthenticationSuccess packet) {
+                CTCommons.debug("[MessagingClient]: Client sucessfully authenticated!", false);
+                isAuthenticated(true);
             }
 
             else {

@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Paper02" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/../../Testserver/Paper02/paper.jar" />
+    <option name="VM_PARAMETERS" value="-Xms2G -Xmx2G -XX:+UseG1GC" />
+    <option name="PROGRAM_PARAMETERS" value="nogui -W ./worlds" />
+    <option name="WORKING_DIRECTORY" value="C:\Users\ASUS\OneDrive\Entwicklung\Testserver\Paper02" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2" />
+  </configuration>
+</component>

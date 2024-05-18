@@ -60,9 +60,9 @@ public abstract class AbstractConnection {
 
         catch (SocketException ex) {
             if ("Socket closed".equals(ex.getMessage())) {
-                CTCommons.debug("[TCPClient]: Connection to " + getAddress() + " was closed.", false);
+                //CTCommons.debug("[MessagingClient]: Connection to " + getAddress() + " was closed.", false);
             } else {
-                CTCommons.debug("[TCPClient]: " + ex.getMessage());
+                CTCommons.debug("[MessagingClient]: " + ex.getMessage());
             }
         }
 
@@ -71,7 +71,7 @@ public abstract class AbstractConnection {
         }
 
         finally {
-            CTCommons.debug("[TCPClient]: Closing connection to " + getAddress(), false);
+            CTCommons.debug("[MessagingClient]: Closed connection to " + getAddress() + ".", false);
             disconnect();
         }
     }
@@ -154,11 +154,11 @@ public abstract class AbstractConnection {
     }
 
     public String getClientName() {
-        return clientName;
+        return clientName == null ? getAddress() : clientName;
     }
 
     public void setClientName(String clientName) {
-        this.clientName = clientName == null ? getAddress() : clientName;
+        this.clientName = clientName;
     }
 
     public String getAddress() {
