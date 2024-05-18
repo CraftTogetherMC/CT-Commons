@@ -15,15 +15,17 @@ public class MessagingService {
         if (enabled)
             return;
 
-        String secretKey;
-        int port;
         String host;
+        int port;
+        String secretKey;
+        boolean acceptRemoteConnections;
 
         if (CTCommons.isProxy()) {
             host = CTCommons.plugin.getConfig().getString("Messaging.Server.BindAddress");
             port = CTCommons.plugin.getConfig().getInt("Messaging.Server.Port");
             secretKey = CTCommons.plugin.getConfig().getString("Messaging.Server.SecretKey");
-            messagingServer = new MessagingServer(host, port, secretKey);
+            acceptRemoteConnections = CTCommons.plugin.getConfig().getBoolean("Messaging.Server.AcceptRemoteConnections");
+            messagingServer = new MessagingServer(host, port, secretKey, acceptRemoteConnections);
         }
         else {
             host = CTCommons.plugin.getConfig().getString("Messaging.Connection.Host");
@@ -37,7 +39,7 @@ public class MessagingService {
 
     public static void disable() {
         if (messagingClient != null)
-            messagingClient.disconnect();
+            MessagingClient.closeAll();
 
         if (messagingServer != null)
             messagingServer.close();
