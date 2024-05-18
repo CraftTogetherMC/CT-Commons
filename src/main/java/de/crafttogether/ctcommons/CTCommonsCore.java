@@ -5,6 +5,7 @@ import de.crafttogether.CTCommons;
 import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.configuration.file.FileConfiguration;
 import de.crafttogether.common.localization.LocalizationManager;
+import de.crafttogether.common.messaging.MessagingClient;
 import de.crafttogether.common.messaging.MessagingServer;
 import de.crafttogether.common.messaging.MessagingService;
 import de.crafttogether.common.mysql.LogFilter;

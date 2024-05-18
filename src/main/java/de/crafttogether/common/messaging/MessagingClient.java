@@ -70,7 +70,8 @@ public class MessagingClient extends Thread {
         public void onConnection() {
             CTCommons.debug("[MessagingClient]: Client connected!", false);
             send(new AuthenticationPacket(serverName, secretKey)
-                    .addRecipient("proxy"));
+                    .addRecipient("proxy")
+                    .setSender(serverName));
         }
 
         @Override
@@ -87,7 +88,7 @@ public class MessagingClient extends Thread {
             }
 
             else {
-                CTCommons.debug(abstractPacket.getClass().getName());
+                CTCommons.debug(abstractPacket.getClass().getSimpleName());
                 Event event = new PacketReceivedEvent(getConnection(), abstractPacket);
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }

@@ -79,8 +79,15 @@ public abstract class AbstractConnection {
         if (connection == null || !connection.isConnected() || connection.isClosed())
             return false;
 
-        if (packet.getRecipients().isEmpty())
-            CTCommons.getLogger().warn("[MessagingClient]: Try to send message without recipients (" + packet.getClass().getName() + ")");
+        if (packet.getSender() == null || packet.getSender().isEmpty()) {
+            CTCommons.getLogger().warn("[MessagingClient]: Unable to send message without specified sender #" + packet.getClass().getSimpleName());
+            return false;
+        }
+
+        if (packet.getRecipients() == null || packet.getRecipients().isEmpty()) {
+            CTCommons.getLogger().warn("[MessagingClient]: Unable to send message without specified recipients #" + packet.getClass().getSimpleName() + " Sender: " + packet.getSender());
+            return false;
+        }
 
         try {
             objOutputStream.reset();
@@ -95,6 +102,8 @@ public abstract class AbstractConnection {
             e.printStackTrace();
             return false;
         }
+
+        CTCommons.getLogger().warn("[MessagingClient]: Sent #" + packet.getClass().getSimpleName() + " to " + packet.getRecipients() + " from " + packet.getSender());
 
         return true;
     }

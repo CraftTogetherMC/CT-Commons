@@ -9,6 +9,8 @@ import de.crafttogether.common.messaging.packets.*;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.crafttogether.common.messaging.ConnectionError.NO_REMOTE_CONNECTIONS;
 
@@ -18,9 +20,9 @@ public class MessagingServer extends Thread {
     private static String secretKey;
     private static boolean acceptRemoteConnections;
 
+    private static ArrayList<ClientConnection> clientsList;
     private boolean listen;
     private ServerSocket serverSocket;
-    private static ArrayList<ClientConnection> clients;
 
     protected MessagingServer(String host, int port, String secretKey, boolean acceptRemoteConnections) {
         this.setName(CTCommons.getPluginInformation().getName() + " network thread");
@@ -33,7 +35,7 @@ public class MessagingServer extends Thread {
 
     @Override
     public void run() {
-        clients = new ArrayList<>();
+        clientsList = new ArrayList<>();
 
         try {
             // Create ServerSocket
@@ -58,14 +60,14 @@ public class MessagingServer extends Thread {
                     continue;
 
                 ClientConnection client = new ClientConnection(connection);
-                CTCommons.debug("[MessagingServer]: " + connection.getInetAddress().getHostAddress() + " connected.", false);
+                CTCommons.debug("[MessagingServer]: " + client.getClientName() + " connected.", false);
 
                 // Should we accept remote connections?
                 if (!acceptRemoteConnections && !client.getAddress().equals("127.0.0.1"))
                     client.kick(NO_REMOTE_CONNECTIONS);
 
-                clients.add(client);
                 CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
+                clientsList.add(client);
                 client.read();
             }
         } catch (BindException e) {
@@ -81,14 +83,52 @@ public class MessagingServer extends Thread {
     }
 
     public void send(Packet packet) {
-        // TODO: Pakete sortieren
+
+        // Broadcast
+        if (packet.getBroadcast()) {
+            packet.setRecipients(new ArrayList<>());
+
+            for (ClientConnection clientConnection : getRegisteredClients())
+                packet.addRecipient(clientConnection.getClientName());
+
+            for (ClientConnection clientConnection : getRegisteredClients()) {
+                if (clientConnection.getClientName().equals(packet.getSender())) continue;
+                clientConnection.send(packet);
+            }
+        }
+
+        // Adressed
+        else {
+            for (String recipient : packet.getRecipients()) {
+                ClientConnection client = getClient(recipient);
+                if (client == null) {
+                    CTCommons.getLogger().warn("[MessagingService]: Unkown recipient (" + recipient + ") for #" + packet.getClass().getSimpleName() + " sendet by " + packet.getSender());
+                    packet.removeRecipient(recipient);
+                }
+            }
+
+            for (String recipient : packet.getRecipients())
+                getClient(recipient).send(packet);
+        }
+    }
+
+    public static ClientConnection getClient(String clientName) {
+        return clientsList.stream().filter(clientConnection -> clientConnection.getClientName().equals(clientName)).findAny().orElse(null);
+    }
+
+    public static ArrayList<ClientConnection> getClients() {
+        return clientsList;
+    }
+
+    public static List<ClientConnection> getRegisteredClients() {
+        return clientsList.stream().filter(AbstractConnection::isAuthenticated).collect(Collectors.toList());
     }
 
     public void close() {
         if (!listen) return;
         listen = false;
 
-        for (ClientConnection client : clients)
+        for (ClientConnection client : clientsList)
             client.disconnect();
 
         if (serverSocket != null) {
@@ -100,7 +140,7 @@ public class MessagingServer extends Thread {
         }
     }
 
-    protected static class ClientConnection extends AbstractConnection {
+    public static class ClientConnection extends AbstractConnection {
         protected ClientConnection(Socket connection) {
             super(connection);
 
@@ -122,10 +162,19 @@ public class MessagingServer extends Thread {
             else if (!isAuthenticated() && abstractPacket instanceof AuthenticationPacket packet) {
                 if (packet.getClientName() != null && packet.getSecretKey() != null && packet.getSecretKey().equals(secretKey)) {
                     setClientName(packet.getClientName());
-                    isAuthenticated(true);
 
+                    // Announce new connected server to other connections
+                    for (ClientConnection clientConnection : clientsList) {
+                        if (!clientConnection.isAuthenticated()) continue;
+                        send(new ServerConnectedPacket(packet.getClientName())
+                                .setBroadcast(true)
+                                .setSender("proxy"));
+                    }
+
+                    isAuthenticated(true);
                     send(new AuthenticationSuccessPacket()
-                            .addRecipient(getClientName()));
+                            .addRecipient(getClientName())
+                            .setSender("proxy"));
 
                     CTCommons.debug("[MessagingClient]: Client (" + getClientName() + ") sucessfully authenticated.", false);
                 }
@@ -134,7 +183,7 @@ public class MessagingServer extends Thread {
             }
 
             else if (isAuthenticated()) {
-                CTCommons.debug(abstractPacket.getClass().getName());
+                CTCommons.debug(abstractPacket.getClass().getSimpleName());
                 Event event = new PacketReceivedEvent(getConnection(), abstractPacket);
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
@@ -145,13 +194,22 @@ public class MessagingServer extends Thread {
 
         @Override
         public void onDisconnect() {
-            clients.remove(this);
+            clientsList.remove(this);
+
+            // Announce disconnected server to other connections
+            for (ClientConnection clientConnection : clientsList) {
+                if (!clientConnection.isAuthenticated()) continue;
+                send(new ServerDisconnectedPacket(getClientName())
+                        .setBroadcast(true)
+                        .setSender("proxy"));
+            }
         }
 
         public void kick(ConnectionError reason) {
             CTCommons.debug("[MessagingServer]: " + getClientName() + " was kicked (" + reason + ").", false);
             send(new ErrorPacket(reason)
-                    .addRecipient(getClientName()));
+                    .addRecipient(getClientName())
+                    .setSender("proxy"));
             disconnect();
         }
     }
