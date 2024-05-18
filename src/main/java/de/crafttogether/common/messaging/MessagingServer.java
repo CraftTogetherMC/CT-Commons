@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.crafttogether.common.messaging.ConnectionError.NO_REMOTE_CONNECTIONS;
+import static de.crafttogether.common.messaging.ConnectionState.NO_REMOTE_CONNECTIONS;
 
 public class MessagingServer extends Thread {
     private static String host;
@@ -68,7 +68,7 @@ public class MessagingServer extends Thread {
 
                 CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
                 clientsList.add(client);
-                client.read();
+                client.start();
             }
         } catch (BindException e) {
             CTCommons.getLogger().warn("[MessagingServer]: Can't bind to " + port + ".. Port already in use!");
@@ -83,6 +83,7 @@ public class MessagingServer extends Thread {
     }
 
     public void send(Packet packet) {
+        CTCommons.debug("CALL SEND");
 
         // Broadcast
         if (packet.getBroadcast()) {
@@ -121,7 +122,10 @@ public class MessagingServer extends Thread {
     }
 
     public static List<ClientConnection> getRegisteredClients() {
-        return clientsList.stream().filter(AbstractConnection::isAuthenticated).collect(Collectors.toList());
+        CTCommons.debug("Client-List: " + clientsList.size());
+        List<ClientConnection> registered = clientsList.stream().filter(clientConnection -> clientConnection.isAuthenticated()).collect(Collectors.toList());
+        CTCommons.debug("Client-List: " + registered.size());
+        return registered;
     }
 
     public void close() {
@@ -146,7 +150,7 @@ public class MessagingServer extends Thread {
 
             CTCommons.getRunnableFactory().create(() -> {
                 if (!isAuthenticated())
-                    kick(ConnectionError.NOT_AUTHENTICATED);
+                    kick(ConnectionState.NOT_AUTHENTICATED);
             }).runTaskLaterAsynchronously(80L);
         }
 
@@ -179,7 +183,7 @@ public class MessagingServer extends Thread {
                     CTCommons.debug("[MessagingClient]: Client (" + getClientName() + ") sucessfully authenticated.", false);
                 }
                 else
-                    kick(ConnectionError.INVALID_AUTHENTICATION);
+                    kick(ConnectionState.INVALID_AUTHENTICATION);
             }
 
             else if (isAuthenticated()) {
@@ -189,11 +193,11 @@ public class MessagingServer extends Thread {
             }
 
             else
-                kick(ConnectionError.NOT_AUTHENTICATED);
+                kick(ConnectionState.NOT_AUTHENTICATED);
         }
 
         @Override
-        public void onDisconnect() {
+        public void onDisconnect(boolean forced) {
             clientsList.remove(this);
 
             // Announce disconnected server to other connections
@@ -205,7 +209,7 @@ public class MessagingServer extends Thread {
             }
         }
 
-        public void kick(ConnectionError reason) {
+        public void kick(ConnectionState reason) {
             CTCommons.debug("[MessagingServer]: " + getClientName() + " was kicked (" + reason + ").", false);
             send(new ErrorPacket(reason)
                     .addRecipient(getClientName())

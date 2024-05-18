@@ -1,15 +1,15 @@
 package de.crafttogether.common.messaging.packets;
 
-import de.crafttogether.common.messaging.ConnectionError;
+import de.crafttogether.common.messaging.ConnectionState;
 
 public class ErrorPacket extends Packet {
-    private final ConnectionError error;
+    private final ConnectionState error;
 
-    public ErrorPacket(ConnectionError error) {
+    public ErrorPacket(ConnectionState error) {
         this.error = error;
     }
 
-    public ConnectionError getError() {
+    public ConnectionState getError() {
         return error;
     }
 }

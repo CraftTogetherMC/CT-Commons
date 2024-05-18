@@ -5,37 +5,48 @@ import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
 import de.crafttogether.common.messaging.events.PacketReceivedEvent;
 import de.crafttogether.common.messaging.packets.*;
+import de.crafttogether.ctcommons.CTCommonsCore;
 
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MessagingClient extends Thread {
+public class MessagingClient {
+    private static MessagingClient instance;
+
     private static String host;
     private static int port;
     private static String secretKey;
     private static String serverName;
-
     private static ClientConnection clientConnection;
-
     private static final Collection<ClientConnection> activeClients = new ArrayList<>();
 
+    private int reconnectAttempts;
+
     protected MessagingClient(String host, int port, String secretKey, String serverName) {
-        this.setName(CTCommons.getPluginInformation().getName() + " network thread");
+        instance = this;
+        reconnectAttempts = 0;
         MessagingClient.host = host;
         MessagingClient.port = port;
         MessagingClient.secretKey = secretKey;
         MessagingClient.serverName = serverName;
+        connect();
+    }
+
+    private void connect() {
+        reconnectAttempts = 0;
 
         Socket connection = null;
+
         try {
             connection = new Socket(host, port);
         }
 
         catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
-                Event event = new ConnectionErrorEvent(ConnectionError.CONNECTION_REFUSED, host, port);
+                CTCommons.debug("[MessagingClient]: Connection to " + host + " was refused.", false);
+                Event event = new ConnectionErrorEvent(ConnectionState.CONNECTION_REFUSED, host, port);
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
         }
@@ -44,23 +55,36 @@ public class MessagingClient extends Thread {
         }
 
         if (connection != null && connection.isConnected()) {
+            CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
             clientConnection = new ClientConnection(connection);
             activeClients.add(clientConnection);
-            start();
+            clientConnection.start();
         }
+        else
+            reconnect();
+    }
 
+    public void reconnect() {
+        long wait = 10L;
+
+        if (reconnectAttempts > 10)
+            wait = 20L;
+
+        if (reconnectAttempts > 20)
+            wait = 60L;
+
+        CTCommons.getRunnableFactory().create(() -> {
+            CTCommons.debug("[MessagingClient]: Try to reconnect...", false);
+            connect();
+            reconnectAttempts++;
+        }).runTaskLaterAsynchronously(wait);
     }
 
     public ClientConnection getClientConnection() {
         return clientConnection;
     }
 
-    @Override
-    public void run() {
-        clientConnection.read();
-    }
-
-    protected class ClientConnection extends AbstractConnection {
+    protected static class ClientConnection extends AbstractConnection {
 
         protected ClientConnection(Socket connection) {
             super(connection);
@@ -95,8 +119,11 @@ public class MessagingClient extends Thread {
         }
 
         @Override
-        public void onDisconnect() {
+        public void onDisconnect(boolean forced) {
             CTCommons.debug("[MessagingClient]: Client disconnected.", false);
+
+            if (!forced)
+                instance.reconnect();
         }
     }
 

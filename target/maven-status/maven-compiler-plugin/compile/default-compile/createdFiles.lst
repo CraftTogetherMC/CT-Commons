@@ -6,13 +6,12 @@ de\crafttogether\common\commands\ThrowingBiConsumer.class
 de\crafttogether\common\messaging\MessagingClient.class
 velocity-plugin.json
 de\crafttogether\common\configuration\file\FileConfigurationOptions.class
-de\crafttogether\common\messaging\Error.class
 de\crafttogether\common\localization\LocalizationManager.class
-de\crafttogether\common\messaging\packets\AuthenticationSuccess.class
 de\crafttogether\common\commands\CloudLocalizedException.class
 de\crafttogether\common\commands\CloudSimpleHandler.class
 de\crafttogether\CTCommons$Bukkit.class
 de\crafttogether\common\event\EventAbstraction.class
+de\crafttogether\common\messaging\packets\ServerConnectedPacket.class
 de\crafttogether\ctcommons\CTCommonsBukkit.class
 de\crafttogether\common\event\Cancellable.class
 de\crafttogether\common\event\Player.class
@@ -32,9 +31,11 @@ de\crafttogether\common\update\UpdateChecker$UpdateFailedExeption.class
 de\crafttogether\common\mysql\MySQLConnection.class
 de\crafttogether\common\update\Commit.class
 de\crafttogether\common\util\PluginUtil.class
+de\crafttogether\common\messaging\ConnectionState.class
 de\crafttogether\common\platform\bungeecord\BungeePlayer.class
 de\crafttogether\common\mysql\MySQLConnection$Consumer.class
 de\crafttogether\common\platform\bukkit\BukkitCommandSender.class
+de\crafttogether\common\messaging\packets\AuthenticationSuccessPacket.class
 de\crafttogether\ctcommons\CTCommonsVelocity.class
 de\crafttogether\common\update\BuildType.class
 de\crafttogether\common\event\AbstractPlayer.class
@@ -53,6 +54,7 @@ de\crafttogether\common\messaging\MessagingServer$ClientConnection.class
 de\crafttogether\common\configuration\MemoryConfiguration.class
 de\crafttogether\common\messaging\MessagingService.class
 de\crafttogether\common\commands\CommandSender.class
+de\crafttogether\common\messaging\packets\ErrorPacket.class
 de\crafttogether\common\configuration\ConfigurationOptions.class
 de\crafttogether\common\platform\bukkit\BukkitPlayer.class
 de\crafttogether\ctcommons\CTCommonsCore$1.class
@@ -96,6 +98,7 @@ de\crafttogether\common\update\Path.class
 de\crafttogether\common\messaging\MessagingClient$ClientConnection.class
 de\crafttogether\common\update\Build.class
 de\crafttogether\common\event\Listener.class
+de\crafttogether\common\messaging\packets\ServerDisconnectedPacket.class
 de\crafttogether\CTCommons$Velocity.class
 de\crafttogether\common\update\Author.class
 de\crafttogether\CTCommons.class

@@ -10,12 +10,13 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 
-import static de.crafttogether.common.messaging.ConnectionError.CONNECTION_REFUSED;
+import static de.crafttogether.common.messaging.ConnectionState.CONNECTION_REFUSED;
 
 
-public abstract class AbstractConnection {
+public abstract class AbstractConnection extends Thread {
     private String clientName;
     private boolean authenticated;
+    private boolean disconnectCalled;
     private Socket connection;
     private OutputStream outputStream;
     private InputStream inputStream;
@@ -23,7 +24,9 @@ public abstract class AbstractConnection {
     private ObjectInputStream objInputStream;
 
     protected AbstractConnection(Socket connection) {
+        this.setName(CTCommons.getPluginInformation().getName() + " network thread");
         this.connection = connection;
+        this.disconnectCalled = false;
         this.authenticated = false;
 
         try {
@@ -48,7 +51,8 @@ public abstract class AbstractConnection {
             onConnection();
     }
 
-    public void read() {
+    @Override
+    public void run() {
         try {
             Object inputPacket;
             while (objInputStream != null && (inputPacket = objInputStream.readObject()) != null)
@@ -59,7 +63,7 @@ public abstract class AbstractConnection {
 
         catch (SocketException ex) {
             if ("Socket closed".equals(ex.getMessage())) {
-                //CTCommons.debug("[MessagingClient]: Connection to " + getAddress() + " was closed.", false);
+                CTCommons.debug("SOCKET CLOSED");
             } else {
                 CTCommons.debug("[MessagingClient]: " + ex.getMessage());
             }
@@ -70,22 +74,23 @@ public abstract class AbstractConnection {
         }
 
         finally {
-            CTCommons.debug("[MessagingClient]: Closed connection to " + getAddress() + ".", false);
-            disconnect();
+            CTCommons.debug("[MessagingClient]: Closed connection to " + getClientName() + ".", false);
+            finalizeConnection();
+        }
+
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public boolean send(Packet packet) {
+    protected boolean send(Packet packet) {
         if (connection == null || !connection.isConnected() || connection.isClosed())
             return false;
 
         if (packet.getSender() == null || packet.getSender().isEmpty()) {
             CTCommons.getLogger().warn("[MessagingClient]: Unable to send message without specified sender #" + packet.getClass().getSimpleName());
-            return false;
-        }
-
-        if (packet.getRecipients() == null || packet.getRecipients().isEmpty()) {
-            CTCommons.getLogger().warn("[MessagingClient]: Unable to send message without specified recipients #" + packet.getClass().getSimpleName() + " Sender: " + packet.getSender());
             return false;
         }
 
@@ -109,6 +114,11 @@ public abstract class AbstractConnection {
     }
 
     public void disconnect() {
+        disconnectCalled = true;
+        finalizeConnection();
+    }
+
+    public void finalizeConnection() {
         try {
             if (objInputStream != null) {
                 objInputStream.close();
@@ -125,15 +135,15 @@ public abstract class AbstractConnection {
                 connection = null;
             }
 
-            onDisconnect();
+            onDisconnect(disconnectCalled);
         } catch (Exception ex) {
             CTCommons.debug(ex.getMessage());
         }
     }
 
-    public void onConnection() {}
+    public void onConnection() { }
     public void onPacketReceived(Packet packet) { }
-    public void onDisconnect() { }
+    public void onDisconnect(boolean forced) { }
 
     public boolean isAuthenticated() {
         return authenticated;

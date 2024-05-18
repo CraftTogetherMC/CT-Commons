@@ -45,25 +45,25 @@ public class MessagingService {
     }
 
     public static void toServer(String serverName, Packet packet) {
-        forward(packet.setRecipient(serverName));
+        send(packet.setRecipient(serverName));
     }
 
     public static void toServer(List<String> serverNames, Packet packet) {
-        forward(packet.setRecipients(serverNames));
+        send(packet.setRecipients(serverNames));
     }
 
     public static void toProxy(Packet packet) {
         if (CTCommons.isProxy()) // TODO: Exception?
             return;
 
-        forward(packet.setRecipient("proxy"));
+        send(packet.setRecipient("proxy"));
     }
 
     public static void broadcast(Packet packet) {
-        forward(packet.setBroadcast(true));
+        send(packet.setBroadcast(true));
     }
 
-    private static void forward(Packet packet) {
+    private static void send(Packet packet) {
         if (!isEnabled())
             return; // TODO: Not enabled exception?
 
