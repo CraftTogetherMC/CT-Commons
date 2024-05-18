@@ -4,17 +4,13 @@ import de.crafttogether.CTCommons;
 import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
 import de.crafttogether.common.messaging.events.PacketReceivedEvent;
-import de.crafttogether.common.messaging.packets.AuthenticationPacket;
-import de.crafttogether.common.messaging.packets.AuthenticationSuccess;
-import de.crafttogether.common.messaging.packets.MessagePacket;
-import de.crafttogether.common.messaging.packets.Packet;
+import de.crafttogether.common.messaging.packets.*;
 
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import static de.crafttogether.common.messaging.Error.NO_REMOTE_CONNECTIONS;
+import static de.crafttogether.common.messaging.ConnectionError.NO_REMOTE_CONNECTIONS;
 
 public class MessagingServer extends Thread {
     private static String host;
@@ -84,6 +80,10 @@ public class MessagingServer extends Thread {
         }
     }
 
+    public void send(Packet packet) {
+        // TODO: Pakete sortieren
+    }
+
     public void close() {
         if (!listen) return;
         listen = false;
@@ -106,36 +106,31 @@ public class MessagingServer extends Thread {
 
             CTCommons.getRunnableFactory().create(() -> {
                 if (!isAuthenticated())
-                    kick(Error.NOT_AUTHENTICATED);
+                    kick(ConnectionError.NOT_AUTHENTICATED);
             }).runTaskLaterAsynchronously(80L);
         }
 
         @Override
         public void onPacketReceived(Packet abstractPacket) {
             // First packet has to be an AuthenticationPacket
-            if (!isAuthenticated() && abstractPacket instanceof AuthenticationPacket packet) {
-                if (packet.clientName() != null && packet.key() != null && packet.key().equals(secretKey)) {
-                    setClientName(packet.clientName());
+            if (abstractPacket instanceof ErrorPacket packet) {
+                Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());
+                CTCommons.debug("[MessagingClient]: Error: " + packet.getError().name());
+                CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
+            }
+
+            else if (!isAuthenticated() && abstractPacket instanceof AuthenticationPacket packet) {
+                if (packet.getClientName() != null && packet.getSecretKey() != null && packet.getSecretKey().equals(secretKey)) {
+                    setClientName(packet.getClientName());
                     isAuthenticated(true);
 
-                    send(new AuthenticationSuccess());
+                    send(new AuthenticationSuccessPacket()
+                            .addRecipient(getClientName()));
+
                     CTCommons.debug("[MessagingClient]: Client (" + getClientName() + ") sucessfully authenticated.", false);
                 }
                 else
-                    kick(Error.INVALID_AUTHENTICATION);
-            }
-
-            else if (!isAuthenticated() && abstractPacket instanceof MessagePacket packet) {
-                if (packet.message().startsWith("ERROR:")) {
-                    Error error = parseError(packet.message());
-
-                    if (error != null) {
-                        Event event = new ConnectionErrorEvent(error, getAddress(), getPort());
-                        CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
-                    }
-                }
-                else
-                    CTCommons.debug("Received Message: " + packet.message());
+                    kick(ConnectionError.INVALID_AUTHENTICATION);
             }
 
             else if (isAuthenticated()) {
@@ -145,7 +140,7 @@ public class MessagingServer extends Thread {
             }
 
             else
-                kick(Error.NOT_AUTHENTICATED);
+                kick(ConnectionError.NOT_AUTHENTICATED);
         }
 
         @Override
@@ -153,9 +148,10 @@ public class MessagingServer extends Thread {
             clients.remove(this);
         }
 
-        public void kick(Error error) {
-            CTCommons.debug("[MessagingServer]: " + getClientName() + " was kicked (" + error + ").", false);
-            send("ERROR:" + error.name());
+        public void kick(ConnectionError reason) {
+            CTCommons.debug("[MessagingServer]: " + getClientName() + " was kicked (" + reason + ").", false);
+            send(new ErrorPacket(reason)
+                    .addRecipient(getClientName()));
             disconnect();
         }
     }

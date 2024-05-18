@@ -3,7 +3,6 @@ package de.crafttogether.common.messaging;
 import de.crafttogether.CTCommons;
 import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
-import de.crafttogether.common.messaging.packets.MessagePacket;
 import de.crafttogether.common.messaging.packets.Packet;
 
 import java.io.*;
@@ -11,7 +10,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 
-import static de.crafttogether.common.messaging.Error.CONNECTION_REFUSED;
+import static de.crafttogether.common.messaging.ConnectionError.CONNECTION_REFUSED;
 
 
 public abstract class AbstractConnection {
@@ -80,6 +79,9 @@ public abstract class AbstractConnection {
         if (connection == null || !connection.isConnected() || connection.isClosed())
             return false;
 
+        if (packet.getRecipients().isEmpty())
+            CTCommons.getLogger().warn("[MessagingClient]: Try to send message without recipients (" + packet.getClass().getName() + ")");
+
         try {
             objOutputStream.reset();
             objOutputStream.writeObject(packet);
@@ -95,23 +97,6 @@ public abstract class AbstractConnection {
         }
 
         return true;
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public boolean send(String message) {
-        return send(new MessagePacket(message));
-    }
-
-    public Error parseError(String message) {
-        message = message.replace("ERROR:", "");
-
-        try {
-            return Error.valueOf(message);
-        } catch (IllegalArgumentException e) {
-            CTCommons.debug("[MessagingClient]: Unkown error occured: " + e.getMessage());
-        }
-
-        return null;
     }
 
     public void disconnect() {

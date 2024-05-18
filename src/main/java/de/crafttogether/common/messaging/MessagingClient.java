@@ -4,10 +4,7 @@ import de.crafttogether.CTCommons;
 import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
 import de.crafttogether.common.messaging.events.PacketReceivedEvent;
-import de.crafttogether.common.messaging.packets.AuthenticationPacket;
-import de.crafttogether.common.messaging.packets.AuthenticationSuccess;
-import de.crafttogether.common.messaging.packets.MessagePacket;
-import de.crafttogether.common.messaging.packets.Packet;
+import de.crafttogether.common.messaging.packets.*;
 
 import java.net.ConnectException;
 import java.net.Socket;
@@ -38,7 +35,7 @@ public class MessagingClient extends Thread {
 
         catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
-                Event event = new ConnectionErrorEvent(Error.CONNECTION_REFUSED, host, port);
+                Event event = new ConnectionErrorEvent(ConnectionError.CONNECTION_REFUSED, host, port);
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
         }
@@ -52,6 +49,10 @@ public class MessagingClient extends Thread {
             start();
         }
 
+    }
+
+    public ClientConnection getClientConnection() {
+        return clientConnection;
     }
 
     @Override
@@ -68,26 +69,19 @@ public class MessagingClient extends Thread {
         @Override
         public void onConnection() {
             CTCommons.debug("[MessagingClient]: Client connected!", false);
-            send(new AuthenticationPacket(serverName, secretKey));
+            send(new AuthenticationPacket(serverName, secretKey)
+                    .addRecipient("proxy"));
         }
 
         @Override
         public void onPacketReceived(Packet abstractPacket) {
-            if (abstractPacket instanceof MessagePacket packet) {
-                if (packet.message().startsWith("ERROR:")) {
-                    Error error = parseError(packet.message());
-
-                    if (error != null) {
-                        Event event = new ConnectionErrorEvent(error, getAddress(), getPort());
-                        CTCommons.debug("[MessagingClient]: Error: " + error.name());
-                        CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
-                    }
-                }
-                else
-                    CTCommons.debug("[MessagingClient]: Received Message: " + packet.message());
+            if (abstractPacket instanceof ErrorPacket packet) {
+                Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());
+                CTCommons.debug("[MessagingClient]: Error: " + packet.getError().name());
+                CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
 
-            else if (abstractPacket instanceof AuthenticationSuccess packet) {
+            else if (abstractPacket instanceof AuthenticationSuccessPacket packet) {
                 CTCommons.debug("[MessagingClient]: Client sucessfully authenticated!", false);
                 isAuthenticated(true);
             }
