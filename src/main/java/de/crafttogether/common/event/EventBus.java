@@ -1,6 +1,8 @@
 package de.crafttogether.common.event;
 
 import com.google.common.collect.ImmutableSet;
+import de.crafttogether.CTCommons;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
@@ -13,8 +15,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class EventBus {
     private final Map<Class<?>, Map<Byte, Map<Object, Method[]>>>
@@ -22,17 +22,9 @@ public class EventBus {
     private final Map<Class<?>, EventHandlerMethod[]> byEventBaked =
             new ConcurrentHashMap<>();
     private final Lock lock = new ReentrantLock();
-    private final Logger logger;
 
-    public EventBus() {
-        this(null);
-    }
-
-    public EventBus(Logger logger) {
-        this.logger =
-                (logger == null) ? Logger.getLogger(Logger.GLOBAL_LOGGER_NAME) : logger;
-    }
-
+    public EventBus() { }
+    
     public void post(Object event) {
         EventHandlerMethod[] handlers = byEventBaked.get(event.getClass());
 
@@ -47,7 +39,7 @@ public class EventBus {
                 } catch (IllegalArgumentException ex) {
                     throw new Error("Method rejected target/argument: " + event, ex);
                 } catch (InvocationTargetException ex) {
-                    logger.log(Level.WARNING,
+                    CTCommons.getLogger().warn(
                             MessageFormat.format(
                                     "Error dispatching event {0} to listener {1}", event,
                                     method.getListener()),
@@ -56,10 +48,7 @@ public class EventBus {
 
                 long elapsed = System.nanoTime() - start;
                 if (elapsed > 50000000) {
-                    logger.log(Level.WARNING,
-                            "Plugin listener {0} took {1}ms to process event {2}!",
-                            new Object[] {method.getListener().getClass().getName(),
-                                    elapsed / 1000000, event});
+                    CTCommons.getLogger().warn("Plugin listener " + event + " took " + elapsed / 1000000 + "ms to process event {2}!");
                 }
             }
         }
@@ -76,9 +65,7 @@ public class EventBus {
             if (annotation != null) {
                 Class<?>[] params = m.getParameterTypes();
                 if (params.length != 1) {
-                    logger.log(Level.INFO,
-                            "Method {0} in class {1} annotated with {2} does not have single argument",
-                            new Object[] {m, listener.getClass(), annotation});
+                    CTCommons.getLogger().info("Method {0} in class {1} annotated with {2} does not have single argument");
                     continue;
                 }
                 Map<Byte, Set<Method>> prioritiesMap =

@@ -6,8 +6,3 @@ authors: [ J0schlZ ]
 website: ${project.url}
 main: de.crafttogether.ctcommons.CTCommonsBukkit
 api-version: 1.17
-commands:
-  ctcommons:
-    description: Shows the current version of the plugin and informations about updates
-    usage: /ctcommons
-    permission: ctcommons.command

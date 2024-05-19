@@ -3,7 +3,7 @@ package de.crafttogether.common.messaging;
 import de.crafttogether.CTCommons;
 import de.crafttogether.common.event.Event;
 import de.crafttogether.common.messaging.events.ConnectionErrorEvent;
-import de.crafttogether.common.messaging.packets.Packet;
+import de.crafttogether.common.messaging.packets.AbstractPacket;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -21,7 +21,7 @@ public abstract class AbstractConnection extends Thread {
     private OutputStream outputStream;
     private InputStream inputStream;
     private ObjectOutputStream objOutputStream;
-    private ObjectInputStream objInputStream;
+    private CustomObjectInputStream objInputStream;
 
     protected AbstractConnection(Socket connection) {
         this.setName(CTCommons.getPluginInformation().getName() + " network thread");
@@ -33,7 +33,7 @@ public abstract class AbstractConnection extends Thread {
             outputStream = this.connection.getOutputStream();
             inputStream = this.connection.getInputStream();
             objOutputStream = new ObjectOutputStream(outputStream);
-            objInputStream = new ObjectInputStream(inputStream);
+            objInputStream = new CustomObjectInputStream(inputStream, new CustomClassLoader());
         }
 
         catch (ConnectException e) {
@@ -47,8 +47,10 @@ public abstract class AbstractConnection extends Thread {
             ex.printStackTrace();
         }
 
-        if (connection != null && connection.isConnected() && objOutputStream != null)
+        if (connection != null && connection.isConnected() && objOutputStream != null) {
             onConnection();
+            start();
+        }
     }
 
     @Override
@@ -56,7 +58,7 @@ public abstract class AbstractConnection extends Thread {
         try {
             Object inputPacket;
             while (objInputStream != null && (inputPacket = objInputStream.readObject()) != null)
-                onPacketReceived((Packet) inputPacket);
+                onPacketReceived((AbstractPacket) inputPacket);
         }
 
         catch (EOFException ignored) { }
@@ -85,7 +87,7 @@ public abstract class AbstractConnection extends Thread {
         }
     }
 
-    protected boolean send(Packet packet) {
+    protected boolean send(AbstractPacket packet) {
         if (connection == null || !connection.isConnected() || connection.isClosed())
             return false;
 
@@ -140,7 +142,7 @@ public abstract class AbstractConnection extends Thread {
     }
 
     public void onConnection() { }
-    public void onPacketReceived(Packet packet) { }
+    public void onPacketReceived(AbstractPacket packet) { }
     public void onDisconnect(boolean forced) { }
 
     public boolean isAuthenticated() {
@@ -176,5 +178,13 @@ public abstract class AbstractConnection extends Thread {
 
     public InputStream getInputStream() {
         return inputStream;
+    }
+
+    public ObjectOutputStream getObjOutputStream() {
+        return objOutputStream;
+    }
+
+    public CustomObjectInputStream getObjInputStream() {
+        return objInputStream;
     }
 }

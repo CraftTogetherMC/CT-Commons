@@ -9,9 +9,10 @@ import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 public class EventManager {
-    private final EventBus eventBus = new EventBus(); // TODO: Logger
+    private final EventBus eventBus = new EventBus();
     private final Multimap<PlatformAbstractionLayer, Listener> listenersByPlugin = ArrayListMultimap.create();
 
     /**

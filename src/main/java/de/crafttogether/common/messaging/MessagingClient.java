@@ -9,7 +9,6 @@ import de.crafttogether.common.messaging.packets.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class MessagingClient {
@@ -55,10 +54,9 @@ public class MessagingClient {
         }
 
         if (connection != null && connection.isConnected()) {
-            CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
             clientConnection = new ClientConnection(connection);
             activeClients.add(clientConnection);
-            clientConnection.start();
+            CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
         }
         else
             reconnect();
@@ -103,7 +101,7 @@ public class MessagingClient {
         }
 
         @Override
-        public void onPacketReceived(Packet abstractPacket) {
+        public void onPacketReceived(AbstractPacket abstractPacket) {
             if (abstractPacket instanceof ErrorPacket packet) {
                 CTCommons.debug("[MessagingClient]: Error: " + packet.getError().name());
                 Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());

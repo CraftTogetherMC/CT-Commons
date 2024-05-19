@@ -19,6 +19,7 @@ import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.commands.MessagingCommands;
 import de.crafttogether.ctcommons.commands.ReloadCommand;
 import de.crafttogether.ctcommons.commands.UpdateCommand;
+import de.crafttogether.ctcommons.listener.PacketReceivedListener;
 import de.crafttogether.ctcommons.listener.PlayerJoinListener;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotations.string.PropertyReplacingStringProcessor;
@@ -29,6 +30,7 @@ public class CTCommonsCore {
     public static CTCommonsCore instance;
     private static PlatformAbstractionLayer platformLayer;
     private static LocalizationManager localizationManager;
+    private static MessagingService messagingService;
     private static FileConfiguration config;
     private static CloudSimpleHandler cloud;
 
@@ -73,6 +75,7 @@ public class CTCommonsCore {
 
         // Register listener
         CTCommons.getEventManager().registerListener(platformLayer, new PlayerJoinListener());
+        CTCommons.getEventManager().registerListener(platformLayer, new PacketReceivedListener());
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager(platformLayer, Localization.class, "en_EN", "locales");
@@ -80,8 +83,10 @@ public class CTCommonsCore {
         localizationManager.addTagResolver("prefix", Localization.PREFIX.deserialize());
 
         // Start MessagingService
-        if (getConfig().getBoolean("Messaging.Enabled"))
-            MessagingService.enable();
+        if (getConfig().getBoolean("Messaging.Enabled")) {
+            messagingService = new MessagingService();
+            messagingService.enable();
+        }
 
         // Check for updates
         if (!config.getBoolean("Updates.Notify.DisableNotifications") && config.getBoolean("Updates.Notify.Console"))
@@ -97,7 +102,7 @@ public class CTCommonsCore {
 
     protected void onDisable(PlatformAbstractionLayer platform) {
         if (MessagingService.isEnabled())
-            MessagingService.disable();
+            messagingService.disable();
 
         PluginInformation pluginInformation = platform.getPluginInformation();
         platform.getPluginLogger().info(pluginInformation.getName() + " v" + platform.getPluginInformation().getVersion() + " disabled.");

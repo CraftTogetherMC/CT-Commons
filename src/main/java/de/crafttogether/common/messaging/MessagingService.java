@@ -1,22 +1,38 @@
 package de.crafttogether.common.messaging;
 
 import de.crafttogether.CTCommons;
-import de.crafttogether.common.messaging.packets.Packet;
+import de.crafttogether.common.messaging.packets.AbstractPacket;
+import de.crafttogether.common.messaging.packets.PacketImplementationPacket;
+import de.crafttogether.common.plugin.PlatformAbstractionLayer;
+import de.crafttogether.common.util.CommonUtil;
+import org.apache.commons.io.IOUtils;
 
+import java.io.*;
+import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class MessagingService {
     private static boolean enabled;
+    private static MessagingService instance;
     private static MessagingServer messagingServer;
     private static MessagingClient messagingClient;
 
-    private MessagingService() { }
+    public MessagingService() {
+        if (instance == null) {
+            instance = this;
+        } else {
+            throw new IllegalStateException("MessagingService already constructed!");
+        }
+    }
 
     public static boolean isEnabled() {
         return enabled;
     }
 
-    public static void enable() {
+    public void enable() {
         if (enabled)
             return;
 
@@ -44,26 +60,26 @@ public class MessagingService {
         enabled = true;
     }
 
-    public static void toServer(String serverName, Packet packet) {
+    public static void toServer(String serverName, AbstractPacket packet) {
         send(packet.setRecipient(serverName));
     }
 
-    public static void toServer(List<String> serverNames, Packet packet) {
+    public static void toServer(List<String> serverNames, AbstractPacket packet) {
         send(packet.setRecipients(serverNames));
     }
 
-    public static void toProxy(Packet packet) {
+    public static void toProxy(AbstractPacket packet) {
         if (CTCommons.isProxy()) // TODO: Exception?
             return;
 
         send(packet.setRecipient("proxy"));
     }
 
-    public static void broadcast(Packet packet) {
+    public static void broadcast(AbstractPacket packet) {
         send(packet.setBroadcast(true));
     }
 
-    private static void send(Packet packet) {
+    private static void send(AbstractPacket packet) {
         if (!isEnabled())
             return; // TODO: Not enabled exception?
 
@@ -75,6 +91,29 @@ public class MessagingService {
                     packet.setSender(messagingClient.getClientConnection().getClientName()));
     }
 
+    public static void registerPacket(Class<?> packetClass) {
+        if (CTCommons.isProxy())
+            return;
+
+        String className = packetClass.getName();
+        String classAsPath = className.replace('.', '/') + ".class";
+        InputStream stream = packetClass.getClassLoader().getResourceAsStream(classAsPath);
+
+        send(new PacketImplementationPacket(packetClass.getName())
+                .setSender(getServerName()));
+        try {
+            assert stream != null;
+            byte[] classData = IOUtils.toByteArray(stream);
+            messagingClient.getClientConnection().getObjOutputStream().writeObject(classData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getServerName() {
+        return CTCommons.isProxy() ? "proxy" : CTCommons.plugin.getConfig().getString("Messaging.ServerName");
+    }
+
     public static List<String> getConnectedServers() {
         if (CTCommons.isProxy())
             return messagingServer.getServerList();
@@ -82,7 +121,7 @@ public class MessagingService {
             return messagingClient.getServerList();
     }
 
-    public static void disable() {
+    public void disable() {
         if (messagingClient != null)
             MessagingClient.closeAll();
 

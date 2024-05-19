@@ -9,6 +9,7 @@ import de.crafttogether.common.messaging.packets.*;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,11 +23,15 @@ public class MessagingServer extends Thread {
     private static boolean acceptRemoteConnections;
 
     private static ArrayList<ClientConnection> clientsList;
+    private static HashMap<String, byte[]> packetImplementations;
+
     private boolean listen;
     private ServerSocket serverSocket;
 
     protected MessagingServer(String host, int port, String secretKey, boolean acceptRemoteConnections) {
         instance = this;
+        packetImplementations = new HashMap<>();
+
         this.setName(CTCommons.getPluginInformation().getName() + " network thread");
 
         MessagingServer.host = host;
@@ -34,6 +39,15 @@ public class MessagingServer extends Thread {
         MessagingServer.secretKey = secretKey;
         MessagingServer.acceptRemoteConnections = acceptRemoteConnections;
         start();
+    }
+
+    public static byte[] getPacketImplementation(String className) {
+        return packetImplementations.get(className);
+    }
+
+    public static void addPacketImplementation(String className, byte[] classData) {
+        CTCommons.getLogger().warn("Registering received class: " + className);
+        packetImplementations.put(className, classData);
     }
 
     @Override
@@ -63,15 +77,14 @@ public class MessagingServer extends Thread {
                     continue;
 
                 ClientConnection client = new ClientConnection(connection);
+                clientsList.add(client);
+
                 CTCommons.debug("[MessagingServer]: " + client.getClientName() + " connected.", false);
+                CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
 
                 // Should we accept remote connections?
                 if (!acceptRemoteConnections && !client.getAddress().equals("127.0.0.1"))
                     client.kick(NO_REMOTE_CONNECTIONS);
-
-                CTCommons.debug("[MessagingServer]: Starting network-thread...", false);
-                clientsList.add(client);
-                client.start();
             }
         } catch (BindException e) {
             CTCommons.getLogger().warn("[MessagingServer]: Can't bind to " + port + ".. Port already in use!");
@@ -85,7 +98,7 @@ public class MessagingServer extends Thread {
         }
     }
 
-    public void send(Packet packet) {
+    public void send(AbstractPacket packet) {
         // Broadcast
         if (packet.getBroadcast()) {
             packet.setRecipients(new ArrayList<>());
@@ -169,15 +182,9 @@ public class MessagingServer extends Thread {
         }
 
         @Override
-        public void onPacketReceived(Packet abstractPacket) {
+        public void onPacketReceived(AbstractPacket abstractPacket) {
             // First packet has to be an AuthenticationPacket
-            if (abstractPacket instanceof ErrorPacket packet) {
-                Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());
-                CTCommons.debug("[MessagingClient]: Error: " + packet.getError().name());
-                CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
-            }
-
-            else if (!isAuthenticated() && abstractPacket instanceof AuthenticationPacket packet) {
+            if (!isAuthenticated() && abstractPacket instanceof AuthenticationPacket packet) {
                 if (packet.getClientName() != null && packet.getSecretKey() != null && packet.getSecretKey().equals(secretKey)) {
                     setClientName(packet.getClientName());
 
@@ -197,8 +204,36 @@ public class MessagingServer extends Thread {
                     kick(ConnectionState.INVALID_AUTHENTICATION);
             }
 
+            else if (abstractPacket instanceof ErrorPacket packet) {
+                Event event = new ConnectionErrorEvent(packet.getError(), getAddress(), getPort());
+                CTCommons.debug("[MessagingClient]: Error: " + packet.getError().name());
+                CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
+            }
+
+            else if (isAuthenticated() && abstractPacket instanceof PacketImplementationPacket packet) {
+                byte[] classData = null;
+                try {
+                    classData = (byte[]) getObjInputStream().readObject();
+                } catch (IOException | ClassNotFoundException e) {
+                    CTCommons.getLogger().warn("Error while retrieving implementation");
+                    throw new RuntimeException(e);
+                }
+
+                MessagingServer.addPacketImplementation(packet.getClassName(), classData);
+            }
+
             else if (isAuthenticated()) {
-                CTCommons.debug(abstractPacket.getClass().getSimpleName());
+                if (abstractPacket.getBroadcast() || !abstractPacket.getRecipients().isEmpty()) {
+                    for (ClientConnection client : clientsList) {
+                        if ((!abstractPacket.getBroadcast() && abstractPacket.getRecipients().contains(client.getClientName())) || abstractPacket.getBroadcast()) {
+                            CTCommons.debug("Forwarding Packet: " + abstractPacket.getClass().getSimpleName() + " from: " + abstractPacket.getSender() + " to: " + client.getClientName());
+                            abstractPacket.setSender(this.getClientName());
+                            abstractPacket.addRecipient(client.getClientName());
+                            client.send(abstractPacket);
+                        }
+                    }
+                }
+
                 Event event = new PacketReceivedEvent(getConnection(), abstractPacket);
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
