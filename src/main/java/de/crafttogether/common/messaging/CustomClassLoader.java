@@ -12,7 +12,7 @@ public class CustomClassLoader extends ClassLoader {
         } catch (Exception ignored) { }
 
         CTCommons.getLogger().warn("FIND REGISTERED CLASS: " + name);
-        byte[] classData = MessagingServer.getPacketImplementation(name);
+        byte[] classData = MessagingServer.instance.getPacketImplementation(name);
 
         if (classData == null)
             return null;

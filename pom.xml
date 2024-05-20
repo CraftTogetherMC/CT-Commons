@@ -313,6 +313,10 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
                         <relocation>
+                            <pattern>net.kyori</pattern>
+                            <shadedPattern>de.crafttogether.common.shaded.net.kyori</shadedPattern> <!-- Replace this -->
+                        </relocation>
+                        <relocation>
                             <pattern>org.incendo</pattern>
                             <shadedPattern>de.crafttogether.common.shaded.org.incendo</shadedPattern> <!-- Replace this -->
                         </relocation>

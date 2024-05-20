@@ -60,12 +60,12 @@ public class MessagingService {
         enabled = true;
     }
 
-    public static void toServer(String serverName, AbstractPacket packet) {
-        send(packet.setRecipient(serverName));
+    public static boolean toServer(String serverName, AbstractPacket packet) {
+        return send(packet.setRecipient(serverName));
     }
 
-    public static void toServer(List<String> serverNames, AbstractPacket packet) {
-        send(packet.setRecipients(serverNames));
+    public static boolean toServer(List<String> serverNames, AbstractPacket packet) {
+        return send(packet.setRecipients(serverNames));
     }
 
     public static void toProxy(AbstractPacket packet) {
@@ -75,19 +75,21 @@ public class MessagingService {
         send(packet.setRecipient("proxy"));
     }
 
-    public static void broadcast(AbstractPacket packet) {
-        send(packet.setBroadcast(true));
+    public static boolean broadcast(AbstractPacket packet) {
+        return send(packet.setBroadcast(true));
     }
 
-    private static void send(AbstractPacket packet) {
+    private static boolean send(AbstractPacket packet) {
         if (!isEnabled())
-            return; // TODO: Not enabled exception?
+            return false; // TODO: Not enabled exception?
 
-        if (CTCommons.isProxy())
+        if (CTCommons.isProxy()) {
             messagingServer.send(
                     packet.setSender("proxy"));
+            return true; // TODO: FIX THIS SHIT SOMEHOW
+        }
         else
-            messagingClient.getClientConnection().send(
+            return messagingClient.getClientConnection().send(
                     packet.setSender(messagingClient.getClientConnection().getClientName()));
     }
 

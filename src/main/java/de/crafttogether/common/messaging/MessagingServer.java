@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 import static de.crafttogether.common.messaging.ConnectionState.NO_REMOTE_CONNECTIONS;
 
 public class MessagingServer extends Thread {
-    private static MessagingServer instance;
+    public static MessagingServer instance;
+
     private static String host;
     private static int port;
     private static String secretKey;
@@ -41,11 +42,11 @@ public class MessagingServer extends Thread {
         start();
     }
 
-    public static byte[] getPacketImplementation(String className) {
+    public byte[] getPacketImplementation(String className) {
         return packetImplementations.get(className);
     }
 
-    public static void addPacketImplementation(String className, byte[] classData) {
+    public void addPacketImplementation(String className, byte[] classData) {
         CTCommons.getLogger().warn("Registering received class: " + className);
         packetImplementations.put(className, classData);
     }
@@ -219,7 +220,7 @@ public class MessagingServer extends Thread {
                     throw new RuntimeException(e);
                 }
 
-                MessagingServer.addPacketImplementation(packet.getClassName(), classData);
+                MessagingServer.instance.addPacketImplementation(packet.getClassName(), classData);
             }
 
             else if (isAuthenticated()) {

@@ -1,7 +1,9 @@
 package de.crafttogether.common.localization;
 
+import de.crafttogether.common.commands.CommandSender;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.CommandSender;
+
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public abstract class LocalizationEnum implements ILocalizationEnum {
@@ -26,13 +28,13 @@ public abstract class LocalizationEnum implements ILocalizationEnum {
     }
 
     @Override
-    public void message(org.bukkit.command.CommandSender sender, Placeholder... arguments) {
+    public void message(CommandSender sender, Placeholder... arguments) {
         ILocalizationEnum.super.message(sender, arguments);
     }
 
     @Override
-    public void message(net.md_5.bungee.api.CommandSender sender, Placeholder... arguments) {
-        ILocalizationEnum.super.message(sender, arguments);
+    public void message(UUID uuid, Placeholder... arguments) {
+        ILocalizationEnum.super.message(uuid, arguments);
     }
 
     @Override

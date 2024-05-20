@@ -1,21 +1,23 @@
 package de.crafttogether.common.localization;
 
 import de.crafttogether.CTCommons;
+import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.common.util.AudienceUtil;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public interface ILocalizationEnum extends ILocalizationDefault {
 
-    default void message(org.bukkit.command.CommandSender sender, Placeholder... arguments) {
-        AudienceUtil.Bukkit.audiences.sender(sender).sendMessage(deserialize(arguments));
+    default void message(CommandSender sender, Placeholder... arguments) {
+        AudienceUtil.getPlayer(sender.getUniqueId()).sendMessage(deserialize(arguments));
     }
 
-    default void message(net.md_5.bungee.api.CommandSender sender, Placeholder... arguments) {
-        AudienceUtil.BungeeCord.audiences.sender(sender).sendMessage(deserialize(arguments));
+    default void message(UUID uuid, Placeholder... arguments) {
+        AudienceUtil.getPlayer(uuid).sendMessage(deserialize(arguments));
     }
 
     default Component deserialize(List<Placeholder> resolvers) {

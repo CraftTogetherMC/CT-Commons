@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessagingClient {
-    private static MessagingClient instance;
+    public static MessagingClient instance;
+
     private static String host;
     private static int port;
     private static String secretKey;
@@ -86,7 +87,7 @@ public class MessagingClient {
         return clientConnection;
     }
 
-    protected static class ClientConnection extends AbstractConnection {
+    public static class ClientConnection extends AbstractConnection {
 
         protected ClientConnection(Socket connection) {
             super(connection);

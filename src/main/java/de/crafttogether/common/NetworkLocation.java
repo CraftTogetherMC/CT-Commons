@@ -1,8 +1,5 @@
 package de.crafttogether.common;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-
 import java.io.Serializable;
 
 /**
@@ -43,11 +40,11 @@ public class NetworkLocation implements Serializable {
      * Gets the corresponding org.bukkit.Location of this location
      * @return Location
      */
-    public Location getBukkitLocation() {
-        if (Bukkit.getWorld(this.world) == null)
+    public org.bukkit.Location getBukkitLocation() {
+        if (org.bukkit.Bukkit.getWorld(this.world) == null)
             return null;
 
-        return new Location(Bukkit.getWorld(this.world), this.getX(), this.getY(), this.getZ(), this.yaw, this.pitch);
+        return new org.bukkit.Location(org.bukkit.Bukkit.getWorld(this.world), this.getX(), this.getY(), this.getZ(), this.yaw, this.pitch);
     }
 
     /**
@@ -56,7 +53,7 @@ public class NetworkLocation implements Serializable {
      * @param serverName Name of the server of the location
      * @return NetworkLocation
      */
-    public static NetworkLocation fromBukkitLocation(Location location, String serverName) {
+    public static NetworkLocation fromBukkitLocation(org.bukkit.Location location, String serverName) {
         if (location.getWorld() == null)
             return null;
 
