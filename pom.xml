@@ -6,7 +6,7 @@
 
     <groupId>de.crafttogether</groupId>
     <artifactId>CTCommons</artifactId>
-    <version>1.0-BETA3</version>
+    <version>1.0-BETA4</version>
     <packaging>jar</packaging>
 
     <name>CTCommons</name>
