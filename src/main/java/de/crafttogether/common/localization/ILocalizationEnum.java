@@ -1,6 +1,7 @@
 package de.crafttogether.common.localization;
 
 import de.crafttogether.CTCommons;
+import de.crafttogether.common.util.AudienceUtil;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
@@ -10,11 +11,11 @@ import java.util.List;
 public interface ILocalizationEnum extends ILocalizationDefault {
 
     default void message(org.bukkit.command.CommandSender sender, Placeholder... arguments) {
-        CTCommons.Bukkit.audiences.sender(sender).sendMessage(deserialize(arguments));
+        AudienceUtil.Bukkit.audiences.sender(sender).sendMessage(deserialize(arguments));
     }
 
     default void message(net.md_5.bungee.api.CommandSender sender, Placeholder... arguments) {
-        CTCommons.BungeeCord.audiences.sender(sender).sendMessage(deserialize(arguments));
+        AudienceUtil.BungeeCord.audiences.sender(sender).sendMessage(deserialize(arguments));
     }
 
     default Component deserialize(List<Placeholder> resolvers) {

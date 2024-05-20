@@ -5,8 +5,6 @@ import de.crafttogether.CTCommons;
 import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.configuration.file.FileConfiguration;
 import de.crafttogether.common.localization.LocalizationManager;
-import de.crafttogether.common.messaging.MessagingClient;
-import de.crafttogether.common.messaging.MessagingServer;
 import de.crafttogether.common.messaging.MessagingService;
 import de.crafttogether.common.mysql.LogFilter;
 import de.crafttogether.common.platform.bukkit.CloudBukkitHandler;
@@ -14,7 +12,7 @@ import de.crafttogether.common.platform.bungeecord.CloudBungeeHandler;
 import de.crafttogether.common.platform.velocity.CloudVelocityHandler;
 import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.plugin.PluginInformation;
-import de.crafttogether.common.util.AdventureUtil;
+import de.crafttogether.common.util.AudienceUtil;
 import de.crafttogether.common.util.PluginUtil;
 import de.crafttogether.ctcommons.commands.MessagingCommands;
 import de.crafttogether.ctcommons.commands.ReloadCommand;
@@ -90,7 +88,7 @@ public class CTCommonsCore {
 
         // Check for updates
         if (!config.getBoolean("Updates.Notify.DisableNotifications") && config.getBoolean("Updates.Notify.Console"))
-            UpdateCommand.getUpdateFeedback((err, feedback) -> AdventureUtil.getConsole().sendMessage(
+            UpdateCommand.getUpdateFeedback((err, feedback) -> AudienceUtil.getConsole().sendMessage(
                     Component.text("[" + platformLayer.getPluginInformation().getName() +  "]:")
                             .appendNewline()
                             .append(err == null ? feedback : Component.text(err.getMessage()))

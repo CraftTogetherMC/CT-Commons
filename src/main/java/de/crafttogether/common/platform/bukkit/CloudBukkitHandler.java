@@ -5,6 +5,7 @@ import de.crafttogether.common.commands.CloudSimpleHandler;
 import de.crafttogether.common.commands.CommandSender;
 import de.crafttogether.common.commands.ThrowingBiConsumer;
 import de.crafttogether.common.localization.LocalizationEnum;
+import de.crafttogether.common.util.AudienceUtil;
 import de.crafttogether.common.util.CommonUtil;
 import de.crafttogether.ctcommons.CTCommonsBukkit;
 import io.leangen.geantyref.TypeToken;
@@ -516,7 +517,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     public MinecraftHelp<CommandSender> help(String commandPrefix, final List<String> filterPrefix) {
         MinecraftHelp<CommandSender> help = MinecraftHelp.<CommandSender>builder()
                 .commandManager(this.manager)
-                .audienceProvider((sender -> CTCommons.Bukkit.audiences.sender(((BukkitCommandSender) sender).getSender())))
+                .audienceProvider((sender -> AudienceUtil.Bukkit.audiences.sender(((BukkitCommandSender) sender).getSender())))
                 .commandPrefix(commandPrefix)
                 .commandFilter(command -> {
                     List<CommandComponent<CommandSender>> args = command.components();

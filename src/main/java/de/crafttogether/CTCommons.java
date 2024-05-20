@@ -6,14 +6,11 @@ import de.crafttogether.common.plugin.PlatformAbstractionLayer;
 import de.crafttogether.common.plugin.PluginInformation;
 import de.crafttogether.common.plugin.scheduling.RunnableFactory;
 import de.crafttogether.common.plugin.server.PluginLogger;
-import de.crafttogether.common.util.AdventureUtil;
+import de.crafttogether.common.util.AudienceUtil;
 import de.crafttogether.ctcommons.CTCommonsBukkit;
 import de.crafttogether.ctcommons.CTCommonsBungee;
 import de.crafttogether.ctcommons.CTCommonsCore;
 import de.crafttogether.ctcommons.CTCommonsVelocity;
-import net.kyori.adventure.platform.AudienceProvider;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.Component;
 
 public class CTCommons {
@@ -33,11 +30,9 @@ public class CTCommons {
 
     public static class Bukkit {
         public static CTCommonsBukkit plugin = CTCommonsBukkit.plugin;
-        public static BukkitAudiences audiences = CTCommonsBukkit.audiences;
     }
     public static class BungeeCord {
         public static CTCommonsBungee plugin = CTCommonsBungee.plugin;
-        public static BungeeAudiences audiences = CTCommonsBungee.audiences;
     }
     public static class Velocity {
         public static CTCommonsVelocity plugin = CTCommonsVelocity.plugin;
@@ -67,7 +62,7 @@ public class CTCommons {
     public static void debug(String message, boolean broadcast) {
         getLogger().info("[DEBUG]: " + message);
         if (broadcast)
-            AdventureUtil.getPlayers().sendMessage(Component.text("[DEBUG]: ").append(Component.text(message)));
+            AudienceUtil.getPlayers().sendMessage(Component.text("[DEBUG]: ").append(Component.text(message)));
     }
 
     public static void debug(String message) {
