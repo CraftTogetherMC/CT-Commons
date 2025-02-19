@@ -1,0 +1,8 @@
+name: CTCommonsBukkit
+main: de.crafttogether.ctcommons.CTCommonsBukkit
+api-version: 1.19
+version: ${project.version}
+build: ${project.build.number}
+authors: [ J0schlZ ]
+load: STARTUP
+description: ${project.description}

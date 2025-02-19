@@ -31,6 +31,7 @@ import org.incendo.cloud.execution.postprocessor.CommandPostprocessor;
 import org.incendo.cloud.injection.ParameterInjector;
 import org.incendo.cloud.meta.CommandMeta;
 import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.paper.PaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.parser.ParserDescriptor;
@@ -81,7 +82,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
     @SuppressWarnings("unchecked")
     public void enable(Plugin plugin) {
         try {
-            this.manager = new PaperCommandManager<>(
+            this.manager = new LegacyPaperCommandManager<>(
                     /* Owning plugin */ plugin,
                     /* Coordinator function */ ExecutionCoordinator.simpleCoordinator(),
                     /* Command Sender <-> C */ SenderMapper.create(this::getCommandSender, (sender) -> ((BukkitCommandSender) sender).getSender())
@@ -97,7 +98,7 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
             brig.setNativeNumberSuggestions(false);
         } catch (BrigadierInitializationException ex) {
             plugin.getLogger().log(Level.WARNING, "Failed to register commands using brigadier, " +
-                    "using fallback instead. Error:", ex);
+                    "using fallback instead. Error: " + ex.getMessage(), ex);
         }
 
         // Create the annotation parser. This allows you to define commands using methods annotated with @Command

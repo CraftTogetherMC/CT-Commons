@@ -39,7 +39,7 @@ public class MySQLAdapter {
         else
             config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + jdbcArguments);
 
-        this.config.setDriverClassName("de.crafttogether.common.dep.org.mariadb.jdbc.Driver");
+        this.config.setDriverClassName("de.crafttogether.common.shaded.org.mariadb.jdbc.Driver");
         this.config.setUsername(username);
         this.config.setPassword(password);
         this.config.setPoolName("[" + platformLayer.getPluginInformation().getName() + "/MySQL-Pool]");

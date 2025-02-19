@@ -15,9 +15,9 @@
 
     <properties>
         <java.version>17</java.version>
-        <paper.version>1.20.4-R0.1-SNAPSHOT</paper.version>
-        <waterfall.version>1.20-R0.1-SNAPSHOT</waterfall.version>
-        <velocity.version>3.3.0-SNAPSHOT</velocity.version>
+        <spigot.version>1.21.4-R0.1-SNAPSHOT</spigot.version>
+        <bungeecord.version>1.21-R0.1-SNAPSHOT</bungeecord.version>
+        <velocity.version>3.4.0-SNAPSHOT</velocity.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>NO-CI</project.build.number>
     </properties>
@@ -41,15 +41,19 @@
             <id>ctogethermc-repo</id>
             <url>https://maven.craft-together-mc.de/</url>
         </repository>
-
         <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
+            <id>maven-repo</id>
+            <url>https://repo1.maven.org/</url>
         </repository>
 
         <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+
+        <repository>
+            <id>bungeecord-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
 
         <repository>
@@ -60,16 +64,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>${paper.version}</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${spigot.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.github.waterfallmc</groupId>
-            <artifactId>waterfall-api</artifactId>
-            <version>${waterfall.version}</version>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>${bungeecord.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -113,35 +117,35 @@
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-paper</artifactId>
-            <version>2.0.0-beta.5</version>
+            <version>2.0.0-beta.10</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-bungee</artifactId>
-            <version>2.0.0-beta.5</version>
+            <version>2.0.0-beta.9</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-velocity</artifactId>
-            <version>2.0.0-beta.5</version>
+            <version>2.0.0-beta.9</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-annotations</artifactId>
-            <version>2.0.0-beta.5</version>
+            <version>2.0.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
-            <version>2.0.0-beta.5</version>
+            <version>2.0.0-beta.9</version>
             <scope>compile</scope>
         </dependency>
 
@@ -149,49 +153,49 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.16.0</version>
+            <version>4.18.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.3.2</version>
+            <version>4.3.4</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bungeecord</artifactId>
-            <version>4.3.2</version>
+            <version>4.3.4</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.17.0</version>
+            <version>4.18.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-legacy</artifactId>
-            <version>4.17.0</version>
+            <version>4.18.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
-            <version>4.17.0</version>
+            <version>4.18.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-gson</artifactId>
-            <version>4.17.0</version>
+            <version>4.18.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -199,21 +203,21 @@
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.2</version>
+            <version>3.1.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bungeecord</artifactId>
-            <version>3.0.2</version>
+            <version>3.1.0</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-velocity</artifactId>
-            <version>3.0.2</version>
+            <version>3.1.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -221,14 +225,14 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>5.1.0</version>
+            <version>6.2.1</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.3.3</version>
+            <version>3.5.1</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -242,8 +246,8 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.23.1</version>
-            <scope>provided</scope>
+            <version>2.24.3</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -257,19 +261,19 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.3</version>
+            <version>2.6</version>
         </dependency>
 
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.1.0</version>
+            <version>26.0.2</version>
         </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.16.1</version>
+            <version>2.18.0</version>
         </dependency>
 
     </dependencies>

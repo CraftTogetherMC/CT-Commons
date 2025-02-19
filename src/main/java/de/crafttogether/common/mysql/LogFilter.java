@@ -12,8 +12,8 @@ public class LogFilter extends AbstractFilter
 {
     public static void registerFilter()
     {
-        Logger logger = (Logger) LogManager.getRootLogger();
-        logger.addFilter(new LogFilter());
+        org.apache.logging.log4j.Logger logger = (org.apache.logging.log4j.Logger) LogManager.getRootLogger();
+        ((org.apache.logging.log4j.core.Logger) logger).addFilter(new LogFilter());
     }
 
     @Override
