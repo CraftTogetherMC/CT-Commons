@@ -57,6 +57,11 @@
         </repository>
 
         <repository>
+            <id>paper-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+
+        <repository>
             <id>MG-Dev Jenkins CI Maven Repository</id>
             <url>https://ci.mg-dev.eu/plugin/repository/everything</url>
         </repository>
