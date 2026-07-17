@@ -19,6 +19,7 @@ import org.incendo.cloud.annotations.PreprocessorMapper;
 import org.incendo.cloud.brigadier.CloudBrigadierManager;
 import org.incendo.cloud.bukkit.BukkitCommandManager;
 import org.incendo.cloud.bukkit.BukkitCommandManager.BrigadierInitializationException;
+import org.incendo.cloud.bukkit.CloudBukkitCapabilities;
 import org.incendo.cloud.caption.Caption;
 import org.incendo.cloud.caption.CaptionProvider;
 import org.incendo.cloud.component.CommandComponent;
@@ -32,7 +33,6 @@ import org.incendo.cloud.injection.ParameterInjector;
 import org.incendo.cloud.meta.CommandMeta;
 import org.incendo.cloud.minecraft.extras.MinecraftHelp;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
-import org.incendo.cloud.paper.PaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.parser.ParserParameter;
@@ -91,11 +91,15 @@ public class CloudBukkitHandler implements CloudSimpleHandler {
             throw new IllegalStateException("Failed to initialize the command manager", e);
         }
 
-        try {
-            manager.registerBrigadier();
-            CloudBrigadierManager<?, ?> brig = manager.brigadierManager();
 
-            brig.setNativeNumberSuggestions(false);
+        try {
+            if (manager.hasCapability(CloudBukkitCapabilities.BRIGADIER)) {
+                manager.registerBrigadier();
+                CloudBrigadierManager<?, ?> brig = manager.brigadierManager();
+                brig.setNativeNumberSuggestions(false);
+            } else {
+                plugin.getLogger().info("Brigadier capability not available in current command manager, using fallback command registration.");
+            }
         } catch (BrigadierInitializationException ex) {
             plugin.getLogger().log(Level.WARNING, "Failed to register commands using brigadier, " +
                     "using fallback instead. Error: " + ex.getMessage(), ex);

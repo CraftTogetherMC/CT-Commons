@@ -19,7 +19,8 @@ public class MessagingService {
     private static MessagingService instance;
     private static MessagingServer messagingServer;
     private static MessagingClient messagingClient;
-
+    private static final java.util.Set<Class<?>> pendingPackets =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
     public MessagingService() {
         if (instance == null) {
             instance = this;
@@ -80,33 +81,60 @@ public class MessagingService {
     }
 
     private static boolean send(AbstractPacket packet) {
-        if (!isEnabled())
-            return false; // TODO: Not enabled exception?
+        if (!isEnabled()) return false;
 
         if (CTCommons.isProxy()) {
-            messagingServer.send(
-                    packet.setSender("proxy"));
-            return true; // TODO: FIX THIS SHIT SOMEHOW
+            messagingServer.send(packet.setSender("proxy"));
+            return true;
         }
-        else
-            return messagingClient.getClientConnection().send(
-                    packet.setSender(messagingClient.getClientConnection().getClientName()));
+
+        var conn = messagingClient.getClientConnection();
+        if (conn == null) {
+            // Noch nicht verbunden -> drop oder queue
+            return false;
+        }
+
+        return conn.send(packet.setSender(conn.getClientName()));
     }
 
     public static void registerPacket(Class<?> packetClass) {
-        if (CTCommons.isProxy())
-            return;
+        if (CTCommons.isProxy()) return;
 
+        pendingPackets.add(packetClass);
+        flushPendingPackets();
+    }
+
+    public static void flushPendingPackets() {
+        if (CTCommons.isProxy()) return;
+        if (!isEnabled()) return;
+
+        var conn = messagingClient.getClientConnection();
+        if (conn == null) return;
+
+        // optional: lock, damit send + writeObject nicht zwischen Threads vermischt
+        synchronized (conn) {
+            for (Class<?> c : pendingPackets) {
+                sendPacketImplementation(conn, c);
+            }
+            pendingPackets.clear();
+        }
+    }
+
+    private static void sendPacketImplementation(MessagingClient.ClientConnection conn, Class<?> packetClass) {
         String className = packetClass.getName();
         String classAsPath = className.replace('.', '/') + ".class";
-        InputStream stream = packetClass.getClassLoader().getResourceAsStream(classAsPath);
 
-        send(new PacketImplementationPacket(packetClass.getName())
-                .setSender(getServerName()));
-        try {
-            assert stream != null;
+        try (InputStream stream = packetClass.getClassLoader().getResourceAsStream(classAsPath)) {
+            if (stream == null) {
+                throw new IllegalStateException("Class bytes not found for " + className + " (" + classAsPath + ")");
+            }
+
+            // Einmal conn verwenden, nicht messagingClient.getClientConnection() mehrfach
+            conn.send(new PacketImplementationPacket(className).setSender(getServerName()));
+
             byte[] classData = IOUtils.toByteArray(stream);
-            messagingClient.getClientConnection().getObjOutputStream().writeObject(classData);
+            conn.getObjOutputStream().writeObject(classData);
+            conn.getObjOutputStream().flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

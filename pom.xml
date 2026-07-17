@@ -14,10 +14,16 @@
     <url>https://github.com/CraftTogetherMC</url>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <spigot.version>1.21.4-R0.1-SNAPSHOT</spigot.version>
         <bungeecord.version>1.21-R0.1-SNAPSHOT</bungeecord.version>
         <velocity.version>3.4.0-SNAPSHOT</velocity.version>
+        <cloud.annotations.version>2.0.0</cloud.annotations.version>
+        <cloud.paper.version>2.0.0-beta.10</cloud.paper.version>
+        <cloud.bungee.version>2.0.0-beta.10</cloud.bungee.version>
+        <cloud.velocity.version>2.0.0-beta.10</cloud.velocity.version>
+        <cloud.extras.version>2.0.0-beta.10</cloud.extras.version>
+        <cloud.brigadier.version>2.0.0-beta.10</cloud.brigadier.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>NO-CI</project.build.number>
     </properties>
@@ -91,7 +97,7 @@
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-api</artifactId>
             <version>5.0.0</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -115,39 +121,54 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Cloud -->
+        <dependency>
+            <groupId>org.incendo</groupId>
+            <artifactId>cloud-annotations</artifactId>
+            <version>${cloud.annotations.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+    <!-- Paper adapter -->
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-paper</artifactId>
-            <version>2.0.0-beta.10</version>
+            <version>${cloud.paper.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.incendo</groupId>
+            <artifactId>cloud-bukkit</artifactId>
+            <version>${cloud.paper.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-bungee</artifactId>
-            <version>2.0.0-beta.9</version>
+            <version>${cloud.bungee.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-velocity</artifactId>
-            <version>2.0.0-beta.10</version>
+            <version>${cloud.velocity.version}</version>
             <scope>compile</scope>
         </dependency>
 
+        <!-- Optional: Brigadier + Extras -->
         <dependency>
             <groupId>org.incendo</groupId>
-            <artifactId>cloud-annotations</artifactId>
-            <version>2.0.0</version>
+            <artifactId>cloud-brigadier</artifactId>
+            <version>${cloud.brigadier.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
-            <version>2.0.0-beta.9</version>
+            <version>${cloud.extras.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -156,7 +177,7 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
             <version>4.22.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -164,6 +185,12 @@
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.4.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -171,6 +198,12 @@
             <artifactId>adventure-platform-bungeecord</artifactId>
             <version>4.3.4</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -178,6 +211,12 @@
             <artifactId>adventure-text-minimessage</artifactId>
             <version>4.22.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -185,6 +224,12 @@
             <artifactId>adventure-text-serializer-legacy</artifactId>
             <version>4.18.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -192,6 +237,12 @@
             <artifactId>adventure-text-serializer-plain</artifactId>
             <version>4.18.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -199,6 +250,12 @@
             <artifactId>adventure-text-serializer-gson</artifactId>
             <version>4.18.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- B-Stats -->
@@ -318,10 +375,6 @@
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <relocations>
-                        <relocation>
-                            <pattern>net.kyori</pattern>
-                            <shadedPattern>de.crafttogether.common.shaded.net.kyori</shadedPattern> <!-- Replace this -->
-                        </relocation>
                         <relocation>
                             <pattern>org.incendo</pattern>
                             <shadedPattern>de.crafttogether.common.shaded.org.incendo</shadedPattern> <!-- Replace this -->

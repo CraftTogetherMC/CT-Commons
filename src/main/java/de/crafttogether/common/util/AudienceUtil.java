@@ -50,4 +50,5 @@ public class AudienceUtil {
             case VELOCITY -> CTCommons.Velocity.proxy.getAllServers().stream().filter(c -> c.getServerInfo().getName().equals(serverName)).findAny().orElse(null);
         };
     }
+
 }

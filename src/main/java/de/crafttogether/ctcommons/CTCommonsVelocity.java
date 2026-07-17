@@ -17,7 +17,7 @@ import java.nio.file.Path;
 @Plugin(
         id = "ctcommons",
         name = "CTCommonsVelocity",
-        version = "1.0-BETA3",
+        version = "1.0-BETA4",
         url = "https://github.com/CraftTogetherMC",
         description = "Library to centralize main functions for multiple plugins which will allow better maintaining capabilities and will lower general plugin sizes.",
         authors = {"J0schlZ"}

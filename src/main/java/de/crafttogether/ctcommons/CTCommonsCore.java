@@ -87,7 +87,7 @@ public class CTCommonsCore {
         }
 
         // Check for updates
-        if (!config.getBoolean("Updates.Notify.DisableNotifications") && config.getBoolean("Updates.Notify.Console"))
+        if (!config.getBoolean("Updates.DisableNotifications") && config.getBoolean("Updates.Notify.Console"))
             Update.check((err, feedback) -> AudienceUtil.getConsole().sendMessage(
                     Component.text("[" + platformLayer.getPluginInformation().getName() +  "]:")
                             .appendNewline()
