@@ -6,7 +6,7 @@
 
     <groupId>de.crafttogether</groupId>
     <artifactId>CTCommons</artifactId>
-    <version>1.0-BETA4</version>
+    <version>1.1-BETA1</version>
     <packaging>jar</packaging>
 
     <name>CTCommons</name>
@@ -14,10 +14,10 @@
     <url>https://github.com/CraftTogetherMC</url>
 
     <properties>
-        <java.version>21</java.version>
-        <spigot.version>1.21.4-R0.1-SNAPSHOT</spigot.version>
-        <bungeecord.version>1.21-R0.1-SNAPSHOT</bungeecord.version>
-        <velocity.version>3.4.0-SNAPSHOT</velocity.version>
+        <java.version>25</java.version>
+        <spigot.version>26.2-R0.1-SNAPSHOT</spigot.version>
+        <bungeecord.version>1.21-R0.4-SNAPSHOT</bungeecord.version>
+        <velocity.version>4.1.0-SNAPSHOT</velocity.version>
         <cloud.annotations.version>2.0.0</cloud.annotations.version>
         <cloud.paper.version>2.0.0-beta.10</cloud.paper.version>
         <cloud.bungee.version>2.0.0-beta.10</cloud.bungee.version>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-api</artifactId>
-            <version>5.0.0</version>
+            <version>5.0.1</version>
             <scope>compile</scope>
         </dependency>
 
@@ -176,14 +176,14 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.22.0</version>
+            <version>5.2.0</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.4.0</version>
+            <version>4.4.1</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -196,7 +196,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bungeecord</artifactId>
-            <version>4.3.4</version>
+            <version>4.4.1</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -209,7 +209,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.22.0</version>
+            <version>5.1.1</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -222,7 +222,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-legacy</artifactId>
-            <version>4.18.0</version>
+            <version>5.1.1</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -235,7 +235,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
-            <version>4.18.0</version>
+            <version>5.2.0</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -248,7 +248,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-gson</artifactId>
-            <version>4.18.0</version>
+            <version>5.1.1</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -344,8 +344,15 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
+
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.velocitypowered</groupId>
+                            <artifactId>velocity-api</artifactId>
+                            <version>${velocity.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
@@ -363,7 +370,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

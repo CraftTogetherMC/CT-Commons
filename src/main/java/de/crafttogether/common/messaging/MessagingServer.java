@@ -11,6 +11,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static de.crafttogether.common.messaging.ConnectionState.NO_REMOTE_CONNECTIONS;
@@ -23,7 +24,7 @@ public class MessagingServer extends Thread {
     private static String secretKey;
     private static boolean acceptRemoteConnections;
 
-    private static ArrayList<ClientConnection> clientsList;
+    private static CopyOnWriteArrayList<ClientConnection> clientsList;
     private static HashMap<String, byte[]> packetImplementations;
 
     private boolean listen;
@@ -53,7 +54,7 @@ public class MessagingServer extends Thread {
 
     @Override
     public void run() {
-        clientsList = new ArrayList<>();
+        clientsList = new CopyOnWriteArrayList<>();
 
         try {
             // Create ServerSocket
@@ -138,7 +139,7 @@ public class MessagingServer extends Thread {
         return clientsList.stream().filter(clientConnection -> clientConnection.getClientName().equals(clientName)).findAny().orElse(null);
     }
 
-    public ArrayList<ClientConnection> getClients() {
+    public CopyOnWriteArrayList<ClientConnection> getClients() {
         return clientsList;
     }
 

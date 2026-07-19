@@ -86,6 +86,7 @@ public abstract class AbstractConnection extends Thread {
             throw new RuntimeException(e);
         }
     }
+    private final Object sendLock = new Object();
 
     protected boolean send(AbstractPacket packet) {
         if (connection == null || !connection.isConnected() || connection.isClosed())
@@ -97,9 +98,11 @@ public abstract class AbstractConnection extends Thread {
         }
 
         try {
-            objOutputStream.reset();
-            objOutputStream.writeObject(packet);
-            objOutputStream.flush();
+            synchronized (sendLock) {
+                objOutputStream.reset();
+                objOutputStream.writeObject(packet);
+                objOutputStream.flush();
+            }
         }
         catch (SocketException e) {
             CTCommons.debug(e.getMessage());
@@ -127,7 +130,7 @@ public abstract class AbstractConnection extends Thread {
 
             if (objOutputStream != null) {
                 objOutputStream.close();
-                objInputStream = null;
+                objOutputStream  = null;
             }
 
             if (connection != null && !connection.isClosed()) {
