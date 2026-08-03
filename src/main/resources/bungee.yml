@@ -1,0 +1,7 @@
+name: CTCommonsBungee
+version: ${project.version}
+build: ${project.build.number}
+description: ${project.description}
+author: J0schlZ
+website: ${project.url}
+main: de.crafttogether.ctcommons.CTCommonsBungee

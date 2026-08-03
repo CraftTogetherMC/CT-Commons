@@ -1,6 +1,7 @@
 package de.crafttogether.common.localization;
 
-import org.bukkit.configuration.file.YamlConfiguration;
+
+import de.crafttogether.common.configuration.file.YamlConfiguration;
 
 public interface ILocalizationDefault {
 

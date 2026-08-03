@@ -2,8 +2,8 @@ package de.crafttogether.common.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.pool.HikariPool;
-import org.bukkit.plugin.Plugin;
+import de.crafttogether.common.plugin.PlatformAbstractionLayer;
+import de.crafttogether.common.plugin.server.PluginLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
@@ -11,21 +11,24 @@ import java.util.logging.Logger;
 
 @SuppressWarnings("unused")
 public class MySQLAdapter {
-    private final Plugin plugin;
+    private final PlatformAbstractionLayer platformLayer;
+    private final PluginLogger logger;
     private final HikariConfig config;
     private HikariDataSource dataSource;
 
     String tablePrefix;
 
-    public MySQLAdapter(Plugin plugin, HikariConfig config, @Nullable String tablePrefix) {
-        this.plugin = plugin;
+    public MySQLAdapter(PlatformAbstractionLayer platformLayer, HikariConfig config, @Nullable String tablePrefix) {
+        this.platformLayer = platformLayer;
+        this.logger = platformLayer.getPluginLogger();
         this.config = config;
         this.tablePrefix = tablePrefix;
         this.createDataSource();
     }
 
-    public MySQLAdapter(Plugin plugin, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
-        this.plugin = plugin;
+    public MySQLAdapter(PlatformAbstractionLayer platformLayer, String host, int port, String username, String password, @Nullable String database, @Nullable String tablePrefix, @Nullable String jdbcArguments) {
+        this.platformLayer = platformLayer;
+        this.logger = platformLayer.getPluginLogger();
         this.config = new HikariConfig();
         this.tablePrefix = tablePrefix;
 
@@ -36,10 +39,10 @@ public class MySQLAdapter {
         else
             config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + jdbcArguments);
 
-        this.config.setDriverClassName("de.crafttogether.common.dep.org.mariadb.jdbc.Driver");
+        this.config.setDriverClassName("de.crafttogether.common.shaded.org.mariadb.jdbc.Driver");
         this.config.setUsername(username);
         this.config.setPassword(password);
-        this.config.setPoolName("[" + plugin.getDescription().getName() + "/MySQL-Pool]");
+        this.config.setPoolName("[" + platformLayer.getPluginInformation().getName() + "/MySQL-Pool]");
         this.config.setMaximumPoolSize(10);
         this.config.setMinimumIdle(1);
         this.config.setIdleTimeout(10000);
@@ -57,15 +60,15 @@ public class MySQLAdapter {
 
         try { this.dataSource = new HikariDataSource(this.config); }
         catch (Exception e) {
-            this.plugin.getLogger().warning("Can't connect to MySQL-Server!");
-            this.plugin.getLogger().warning(e.getCause().getMessage());
+            logger.warn("Can't connect to MySQL-Server!", e);
+            logger.warn(e.getCause().getMessage());
         }
     }
 
     public MySQLConnection getConnection() {
         if (this.dataSource == null)
             return null;
-        return new MySQLConnection(this, this.dataSource, this.plugin);
+        return new MySQLConnection(platformLayer, this, this.dataSource);
     }
 
     public boolean isActive() {
