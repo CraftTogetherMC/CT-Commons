@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.crafttogether</groupId>
     <artifactId>CTCommons</artifactId>
-    <version>1.1.3-SNAPSHOT</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>CTCommons</name>
@@ -14,17 +14,17 @@
     <url>https://github.com/CraftTogetherMC</url>
 
     <properties>
-        <java.version>25</java.version>
-        <spigot.version>26.2-R0.1-SNAPSHOT</spigot.version>
+        <java.version>21</java.version>
+        <spigot.version>1.21.11-R0.1-SNAPSHOT</spigot.version>
         <bungeecord.version>1.21-R0.4-SNAPSHOT</bungeecord.version>
-        <velocity.version>4.1.0-SNAPSHOT</velocity.version>
+        <velocity.version>3.4.0-SNAPSHOT</velocity.version>
         <cloud.annotations.version>2.0.0</cloud.annotations.version>
-        <cloud.paper.version>2.0.0-beta.17</cloud.paper.version>
-        <cloud.bungee.version>2.0.0-beta.17</cloud.bungee.version>
-        <cloud.velocity.version>2.0.0-beta.17</cloud.velocity.version>
-        <cloud.extras.version>2.0.0-beta.17</cloud.extras.version>
-        <cloud.brigadier.version>2.0.0-beta.17</cloud.brigadier.version>
+
+        <cloud.version>2.0.0-beta.10</cloud.version>
         <log4j.version>2.26.1</log4j.version>
+        <snakeyaml.version>2.6</snakeyaml.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>NO-CI</project.build.number>
     </properties>
@@ -44,7 +44,6 @@
     </profiles>
 
     <repositories>
-
         <repository>
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2/</url>
@@ -57,7 +56,7 @@
 
         <repository>
             <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
 
         <repository>
@@ -66,12 +65,13 @@
         </repository>
 
         <repository>
-            <id>MG-Dev Jenkins CI Maven Repository</id>
+            <id>mg-dev</id>
             <url>https://ci.mg-dev.eu/plugin/repository/everything</url>
         </repository>
     </repositories>
 
     <dependencies>
+        <!-- Platforms -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -84,7 +84,6 @@
             <artifactId>bungeecord-api</artifactId>
             <version>${bungeecord.version}</version>
             <scope>provided</scope>
-
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -100,84 +99,72 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Platform-abstraction-layer -->
+        <!-- Platform abstraction layer -->
         <dependency>
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-api</artifactId>
             <version>5.0.1</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-bukkit</artifactId>
             <version>5.0.0</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-bungeecord</artifactId>
             <version>5.0.0</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-velocity</artifactId>
             <version>5.0.0</version>
-            <scope>compile</scope>
         </dependency>
 
+        <!-- Cloud commands -->
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-annotations</artifactId>
             <version>${cloud.annotations.version}</version>
-            <scope>compile</scope>
         </dependency>
 
-    <!-- Paper adapter -->
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-paper</artifactId>
-            <version>${cloud.paper.version}</version>
-            <scope>compile</scope>
+            <version>${cloud.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-bukkit</artifactId>
-            <version>${cloud.paper.version}</version>
-            <scope>compile</scope>
+            <version>${cloud.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-bungee</artifactId>
-            <version>${cloud.bungee.version}</version>
-            <scope>compile</scope>
+            <version>${cloud.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-velocity</artifactId>
-            <version>${cloud.velocity.version}</version>
-            <scope>compile</scope>
+            <version>${cloud.version}</version>
         </dependency>
 
-        <!-- Optional: Brigadier + Extras -->
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-brigadier</artifactId>
-            <version>${cloud.brigadier.version}</version>
-            <scope>compile</scope>
+            <version>${cloud.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.incendo</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
-            <version>${cloud.extras.version}</version>
-            <scope>compile</scope>
+            <version>${cloud.version}</version>
         </dependency>
 
         <!-- Adventure -->
@@ -192,7 +179,6 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.4.1</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>net.kyori</groupId>
@@ -205,7 +191,6 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bungeecord</artifactId>
             <version>4.4.1</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>net.kyori</groupId>
@@ -216,15 +201,8 @@
 
         <dependency>
             <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bungeecord</artifactId>
-            <version>4.3.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
             <version>5.1.1</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>net.kyori</groupId>
@@ -237,7 +215,6 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-legacy</artifactId>
             <version>5.1.1</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>net.kyori</groupId>
@@ -250,7 +227,6 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
             <version>5.2.0</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>net.kyori</groupId>
@@ -263,7 +239,6 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-gson</artifactId>
             <version>5.1.1</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>net.kyori</groupId>
@@ -272,41 +247,36 @@
             </exclusions>
         </dependency>
 
-        <!-- B-Stats -->
+        <!-- bStats -->
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
             <version>3.1.0</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bungeecord</artifactId>
             <version>3.1.0</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-velocity</artifactId>
             <version>3.1.0</version>
-            <scope>compile</scope>
         </dependency>
 
-        <!-- MySQL -->
+        <!-- Database -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>6.2.1</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <version>3.5.1</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.waffle</groupId>
@@ -315,26 +285,31 @@
             </exclusions>
         </dependency>
 
-        <!-- Other -->
+        <!-- Configuration and utilities -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+
+        <!-- Logging API supplied by the server -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bungeecord</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-velocity</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -345,23 +320,11 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.18.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>26.0.2</version>
+            <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -372,7 +335,6 @@
                 <version>3.13.0</version>
                 <configuration>
                     <release>${java.version}</release>
-
                     <annotationProcessorPaths>
                         <path>
                             <groupId>com.velocitypowered</groupId>
@@ -411,11 +373,11 @@
                     <relocations>
                         <relocation>
                             <pattern>org.incendo</pattern>
-                            <shadedPattern>de.crafttogether.common.shaded.org.incendo</shadedPattern> <!-- Replace this -->
+                            <shadedPattern>de.crafttogether.common.shaded.org.incendo</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>io.leangen.geantyref</pattern>
-                            <shadedPattern>de.crafttogether.common.shaded.typetoken</shadedPattern> <!-- Replace this -->
+                            <shadedPattern>de.crafttogether.common.shaded.typetoken</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>de.exlll</pattern>
@@ -450,8 +412,11 @@
                         </goals>
                         <configuration>
                             <target>
-                                <copy file="target/${project.name}-${project.version}.jar" tofile="target/static/${project.name}.jar"/>
-                                <copy file="target/${project.name}-${project.version}.jar" tofile="target/static/${project.name}-${project.version}-${project.build.number}.jar"/>
+                                <mkdir dir="target/static"/>
+                                <copy file="target/${project.name}-${project.version}.jar"
+                                      tofile="target/static/${project.name}.jar"/>
+                                <copy file="target/${project.name}-${project.version}.jar"
+                                      tofile="target/static/${project.name}-${project.version}-${project.build.number}.jar"/>
                             </target>
                         </configuration>
                     </execution>
