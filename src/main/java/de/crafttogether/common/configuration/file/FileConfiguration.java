@@ -7,7 +7,7 @@ import de.crafttogether.common.configuration.MemoryConfiguration;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,8 +22,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
-
+import java.util.Base64;
 /**
  * This is a base class for all File based implementations of {@link
  * Configuration}
@@ -54,7 +53,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
     @Deprecated
     public static final boolean SYSTEM_UTF;
     static {
-        final byte[] testBytes = Base64Coder.decode("ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX4NCg==");
+        final byte[] testBytes = Base64.getDecoder().decode("ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX4NCg==");
         final String testString = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\r\n";
         final Charset defaultCharset = Charset.defaultCharset();
         final String resultString = new String(testBytes, defaultCharset);

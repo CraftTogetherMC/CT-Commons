@@ -101,7 +101,7 @@ public class CTCommonsCore {
     protected void onDisable(PlatformAbstractionLayer platform) {
         if (MessagingService.isEnabled())
             messagingService.disable();
-
+            LogFilter.unregisterFilter();
         PluginInformation pluginInformation = platform.getPluginInformation();
         platform.getPluginLogger().info(pluginInformation.getName() + " v" + platform.getPluginInformation().getVersion() + " disabled.");
     }

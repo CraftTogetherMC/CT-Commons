@@ -10,10 +10,49 @@ import org.apache.logging.log4j.message.Message;
 
 public class LogFilter extends AbstractFilter
 {
-    public static void registerFilter()
+    private static LogFilter registeredFilter;
+    public static synchronized boolean registerFilter()
     {
-        org.apache.logging.log4j.Logger logger = (org.apache.logging.log4j.Logger) LogManager.getRootLogger();
-        ((org.apache.logging.log4j.core.Logger) logger).addFilter(new LogFilter());
+        if (registeredFilter != null)
+        {
+            return true;
+        }
+
+        org.apache.logging.log4j.Logger logger = LogManager.getRootLogger();
+
+        if (!(logger instanceof org.apache.logging.log4j.core.Logger coreLogger))
+        {
+            return false;
+        }
+
+        registeredFilter = new LogFilter();
+        coreLogger.addFilter(registeredFilter);
+        return true;
+    }
+
+    public static synchronized void unregisterFilter()
+    {
+        if (registeredFilter == null)
+        {
+            return;
+        }
+
+        org.apache.logging.log4j.Logger logger = LogManager.getRootLogger();
+
+        if (logger instanceof org.apache.logging.log4j.core.Logger coreLogger)
+        {
+            var loggerConfig = coreLogger.get();
+
+            if (loggerConfig != null)
+            {
+                loggerConfig.removeFilter(registeredFilter);
+
+                var context = coreLogger.getContext();
+                context.updateLoggers();
+            }
+        }
+
+        registeredFilter = null;
     }
 
     @Override

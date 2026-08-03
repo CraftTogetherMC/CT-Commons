@@ -5,7 +5,7 @@ import de.crafttogether.common.configuration.Configuration;
 import de.crafttogether.common.configuration.ConfigurationSection;
 import de.crafttogether.common.configuration.InvalidConfigurationException;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
