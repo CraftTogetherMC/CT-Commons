@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 import static de.crafttogether.common.messaging.ConnectionState.CONNECTION_REFUSED;
 
@@ -20,6 +21,7 @@ public abstract class AbstractConnection extends Thread {
     private Socket connection;
     private OutputStream outputStream;
     private InputStream inputStream;
+    private boolean connectionReady;
     private ObjectOutputStream objOutputStream;
     private CustomObjectInputStream objInputStream;
 
@@ -28,12 +30,33 @@ public abstract class AbstractConnection extends Thread {
         this.connection = connection;
         this.disconnectCalled = false;
         this.authenticated = false;
+        this.connectionReady = false;
 
         try {
+            this.connection.setSoTimeout(5000);
+
             outputStream = this.connection.getOutputStream();
-            inputStream = this.connection.getInputStream();
             objOutputStream = new ObjectOutputStream(outputStream);
+            objOutputStream.flush();
+
+            PushbackInputStream pushbackInputStream = new PushbackInputStream(this.connection.getInputStream(), 4);
+            byte[] streamHeader = pushbackInputStream.readNBytes(4);
+
+            if (streamHeader.length != 4
+                    || (streamHeader[0] & 0xFF) != 0xAC
+                    || (streamHeader[1] & 0xFF) != 0xED
+                    || (streamHeader[2] & 0xFF) != 0x00
+                    || (streamHeader[3] & 0xFF) != 0x05) {
+                throw new StreamCorruptedException("Invalid Java serialization stream header from "
+                        + connection.getInetAddress().getHostAddress());
+            }
+
+            pushbackInputStream.unread(streamHeader);
+            inputStream = pushbackInputStream;
             objInputStream = new CustomObjectInputStream(inputStream, new CustomClassLoader());
+
+            this.connection.setSoTimeout(0);
+            this.connectionReady = true;
         }
 
         catch (ConnectException e) {
@@ -43,14 +66,36 @@ public abstract class AbstractConnection extends Thread {
                 CTCommons.getRunnableFactory().create(() -> CTCommons.getEventManager().callEvent(event)).runTask();
             }
         }
+        catch (StreamCorruptedException ex) {
+            CTCommons.debug("[MessagingServer]: Rejected invalid connection from "
+                    + connection.getInetAddress().getHostAddress() + ": " + ex.getMessage(), false);
+            closeSocketQuietly();
+        }
+        catch (SocketTimeoutException ex) {
+            CTCommons.debug("[MessagingServer]: Handshake timeout from "
+                    + connection.getInetAddress().getHostAddress() + ".", false);
+            closeSocketQuietly();
+        }
         catch (Exception ex) {
             ex.printStackTrace();
+            closeSocketQuietly();
         }
 
-        if (connection != null && connection.isConnected() && objOutputStream != null) {
+        if (connectionReady) {
             onConnection();
             start();
         }
+    }
+
+    private void closeSocketQuietly() {
+        try {
+            if (connection != null && !connection.isClosed())
+                connection.close();
+        } catch (IOException ignored) { }
+    }
+
+    public boolean isConnectionReady() {
+        return connectionReady;
     }
 
     @Override

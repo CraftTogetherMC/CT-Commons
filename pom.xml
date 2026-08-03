@@ -19,11 +19,11 @@
         <bungeecord.version>1.21-R0.4-SNAPSHOT</bungeecord.version>
         <velocity.version>4.1.0-SNAPSHOT</velocity.version>
         <cloud.annotations.version>2.0.0</cloud.annotations.version>
-        <cloud.paper.version>2.0.0-beta.10</cloud.paper.version>
-        <cloud.bungee.version>2.0.0-beta.10</cloud.bungee.version>
-        <cloud.velocity.version>2.0.0-beta.10</cloud.velocity.version>
-        <cloud.extras.version>2.0.0-beta.10</cloud.extras.version>
-        <cloud.brigadier.version>2.0.0-beta.10</cloud.brigadier.version>
+        <cloud.paper.version>2.0.0-beta.17</cloud.paper.version>
+        <cloud.bungee.version>2.0.0-beta.17</cloud.bungee.version>
+        <cloud.velocity.version>2.0.0-beta.17</cloud.velocity.version>
+        <cloud.extras.version>2.0.0-beta.17</cloud.extras.version>
+        <cloud.brigadier.version>2.0.0-beta.17</cloud.brigadier.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>NO-CI</project.build.number>
     </properties>

@@ -69,11 +69,12 @@ public class MessagingService {
         return send(packet.setRecipients(serverNames));
     }
 
-    public static void toProxy(AbstractPacket packet) {
-        if (CTCommons.isProxy()) // TODO: Exception?
-            return;
+    public static boolean toProxy(AbstractPacket packet) {
+        if (CTCommons.isProxy()) {
+            return false;
+        }
 
-        send(packet.setRecipient("proxy"));
+        return send(packet.setRecipient("proxy"));
     }
 
     public static boolean broadcast(AbstractPacket packet) {

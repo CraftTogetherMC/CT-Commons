@@ -44,3 +44,7 @@ This is a library we use to create plugins for the [CraftTogetherMC](https://git
 - [Adventure](https://docs.adventure.kyori.net) (Very neat UI-Framework for Bukkit/Bungeecord and more)
 - [MiniMessage](https://docs.adventure.kyori.net/minimessage) (Text format to represent chat components)
 - [BStats](https://bstats.org) (Plugin Metrics)
+
+## NetworkGuard integration
+`MessagingService.toProxy(AbstractPacket)` returns a boolean indicating whether the packet was handed to an active CT-Commons connection. Existing callers may ignore the return value.
+CT-Commons contains no CT-NetworkGuard database configuration or database management.

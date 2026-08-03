@@ -79,6 +79,9 @@ public class MessagingServer extends Thread {
                     continue;
 
                 ClientConnection client = new ClientConnection(connection);
+                if (!client.isConnectionReady())
+                    continue;
+
                 clientsList.add(client);
 
                 CTCommons.debug("[MessagingServer]: " + client.getClientName() + " connected.", false);
@@ -177,10 +180,12 @@ public class MessagingServer extends Thread {
         protected ClientConnection(Socket connection) {
             super(connection);
 
-            CTCommons.getRunnableFactory().create(() -> {
-                if (!isAuthenticated())
-                    kick(ConnectionState.NOT_AUTHENTICATED);
-            }).runTaskLaterAsynchronously(80L);
+            if (isConnectionReady()) {
+                CTCommons.getRunnableFactory().create(() -> {
+                    if (!isAuthenticated())
+                        kick(ConnectionState.NOT_AUTHENTICATED);
+                }).runTaskLaterAsynchronously(80L);
+            }
         }
 
         @Override
@@ -246,11 +251,11 @@ public class MessagingServer extends Thread {
 
         @Override
         public void onDisconnect(boolean forced) {
+            boolean wasAuthenticated = isAuthenticated();
             clientsList.remove(this);
 
-            // Announce disconnected server to other connections
-            for (ClientConnection clientConnection : clientsList) {
-                if (!clientConnection.isAuthenticated()) continue;
+            // Announce a real authenticated disconnect exactly once.
+            if (wasAuthenticated) {
                 instance.send(new ServerDisconnectedPacket(getClientName())
                         .setBroadcast(true)
                         .setSender("proxy"));
