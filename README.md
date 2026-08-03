@@ -5,7 +5,7 @@
 ![](https://img.shields.io/spiget/download-size/107439?style=flat-square)
 ![](https://img.shields.io/spiget/downloads/107439?style=flat-square)
   
-[Development Builds](https://ci.craft-together-mc.de/job/CTCommons) / 
+[Development Builds](https://ci.craft-together-mc.de/job/CT%20Commons) / 
 [Javadocs](https://ci.craft-together-mc.de/job/CT%20Commons/javadoc) / 
 [Modrinth](https://modrinth.com/plugin/ctcommons) / 
 [SpigotMC](https://www.spigotmc.org/resources/ctcommons.107439/)
@@ -38,6 +38,7 @@ This is a library we use to create plugins for the [CraftTogetherMC](https://git
 ```
 
 ### Includes:
+- [Platform-abstraction-Layer](https://github.com/J0schlZ/Platform-abstraction-layer) (Library for abstracting away some server platform specific implementations)
 - [HikariCP](https://github.com/brettwooldridge/HikariCP) (High-performance, JDBC connection pool)
 - [MariaDB Connector/J](https://mariadb.com/kb/en/about-mariadb-connector-j/) (JDBC-Driver)
 - [Cloud](https://cloud.incendo.org/) (Framework for annotated and platform independent commands)
