@@ -27,8 +27,8 @@
           <entry name="$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-gson/5.2.0/adventure-text-serializer-gson-5.2.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-json/5.2.0/adventure-text-serializer-json-5.2.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/kyori/option/1.1.0/option-1.1.0.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/auto/service/auto-service-annotations/1.1.1/auto-service-annotations-1.1.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-commons/5.2.0/adventure-text-serializer-commons-5.2.0.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/auto/service/auto-service-annotations/1.1.1/auto-service-annotations-1.1.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-legacy/5.2.0/adventure-text-serializer-legacy-5.2.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-plain/5.2.0/adventure-text-serializer-plain-5.2.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/kyori/adventure-text-minimessage/5.2.0/adventure-text-minimessage-5.2.0.jar" />

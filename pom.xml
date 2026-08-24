@@ -111,7 +111,7 @@
         <dependency>
             <groupId>de.crafttogether</groupId>
             <artifactId>platform-abstraction-layer-bukkit</artifactId>
-            <version>5.0.0</version>
+            <version>5.0.1</version>
             <scope>compile</scope>
         </dependency>
 
